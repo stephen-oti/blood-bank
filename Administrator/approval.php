@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <!--
 This is a starter template page. Use this page to start your new project from
@@ -39,7 +40,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
       </div><!-- /.container-fluid -->
     </section>
-
     <?php
       // Check if the form has been submitted
       if(isset($_POST['reject-approval'])) {
@@ -74,6 +74,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       if(isset($_POST['accept-approval'])) {
         // Get the updated values from the form
         $acceptid = $_POST['acceptid'];
+        $admin_role = $_POST['admin_role'];
         $comments = "Request accepted";
         $status = 1;
           // Update the record in the Blood Bank table
@@ -88,13 +89,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
             $request = mysqli_fetch_assoc($result);
             
             if($request['req_role'] == "admin"){
-              $sql = "INSERT INTO admin(req_id,fname,lname,email, phone, pword, admin_status) VALUES(?, ?, ?, ?, ?, ?, ?)";
+              $sql = "INSERT INTO admin(req_id,a_role,fname,lname,email, phone, pword, admin_status) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+              $stmnt = mysqli_prepare($conn, $sql);
+              mysqli_stmt_bind_param($stmnt, 'issssssi',$acceptid, $admin_role, $request['fname'], $request['lname'], $request['email'], $request['phone'], $request['pword'], $status);
+
             }else{
               $sql = "INSERT INTO officer(req_id,fname,lname,email, phone, pword, o_status) VALUES(?, ?, ?, ?, ?, ?, ?)";
+              $stmnt = mysqli_prepare($conn, $sql);
+              mysqli_stmt_bind_param($stmnt, 'isssssi',$acceptid, $request['fname'], $request['lname'], $request['email'], $request['phone'], $request['pword'], $status);
+
             }
-           
-            $stmnt = mysqli_prepare($conn, $sql);
-            mysqli_stmt_bind_param($stmnt, 'isssssi',$acceptid, $request['fname'], $request['lname'], $request['email'], $request['phone'], $request['pword'], $status);
             mysqli_stmt_execute($stmnt);
             if(mysqli_stmt_error($stmt)) {
               echo "<div class='alert alert-danger alert-dismissible fade show btn-delete' role='alert'>Error Inserting Record to Respective Table: " . mysqli_error($conn)."</div>";
@@ -113,6 +117,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
         
       }
       
+    ?>
+    <?php
+      if($admin_details['a_role'] != "approval"){
+        echo "<div style='margin: auto;'>
+                <h1 style='text-align: center;'>Page Strictly Restricted For Approval Managers !!!</h1>
+              </div>";
+      }else{
     ?>
     <!-- Main content -->
     <section class="content">
@@ -193,6 +204,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div><!-- /.container-fluid -->
       </section>
       <!-- /.content -->
+      <?php
+      }
+      ?>
   </div>
   <!-- /.content-wrapper -->
 
@@ -237,7 +251,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <h2 class="text-center"><span id="confirmacceptance" style="text-transform: uppercase;"></span></h2>
         </div>
         <form method="post" name="accept-approval" id="accept-approval" role="accept-approval" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-        <input type="hidden" name="acceptid" id="acceptid">
+          <input type="hidden" name="acceptid" id="acceptid">
+          
+          <div class="form-group" style="width:90%; margin:auto;padding:16px;">
+          <label for="">Assign Role</label>
+          <select name="admin_role" id="admin_role" class="form-control" required>
+            <option value="admin">Admin</option>
+            <option value="approval">Approval</option>
+          </select>
+          </div>
+
           <div class="modal-footer">
               <!-- <div class="row"> -->
                   <button type="submit" name="accept-approval" class="btn btn-success btn-block">Accept Request</button>
@@ -261,7 +284,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
         <div class="modal-body">
         <form method="post" name="reject-approval" id="reject-approval" role="reject-approval" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-        <label for="" class="text-danger">Deleting... <span id="rejname" style="text-transform: uppercase;" class="text-dark"></span></label>
+        <label for="" class="text-danger">Rejecting... <span id="rejname" style="text-transform: uppercase;" class="text-dark"></span></label>
         <input type="hidden" name="rejid" id="rejid">
             <div class="input-group mb-3">
                 
@@ -287,58 +310,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   </div>
   <!-- /.modal -->
 
-  <div class="modal fade" id="modal-assign">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Assign Blood Bank</h4>
-          <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form action="#" method="post">
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" name="fname" placeholder="Full name">
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-user"></span>
-                </div>
-              </div>
-            </div>
-            <div class="input-group mb-3">
-                <select name="" id="" class="form-control" >
-                  <option value="">~Select blood Bank~</option>
-                  <option value="">Kisumu Blood Bank</option>
-                  <option value="">MTRRH Blood ank</option>
-                  <option value="">PGH Bank</option>
-                  <option value="">KNH Bank</option>
-                  <option value="">Luanda Bank</option>
-                </select>
-                <div class="input-group-append">
-                  <div class="input-group-text">
-                    <span class="fas fa-university"></span>
-                  </div>
-                </div>
-            </div>
-            <div class="row">
-              <div class="col-8">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-              </div>
-              <!-- /.col -->
-              <div class="col-4">
-                <button type="submit" class="btn btn-success btn-block">Assign</button>
-              </div>
-              <!-- /.col -->
-            </div>
-          </form>
-        </div>
-      </div>
-      <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
-  </div>
-  <!-- /.modal -->
+
 
   <?php include 'includes/footer.php'; ?>
 

@@ -76,8 +76,8 @@ include '../dbconfig.php';
         <div class="input-group mb-3" name="role" id="role">
             <select name="role" id="role" class="form-control">
               <option value=" ">~Role~</option>
-              <option value="admin">Bank Officer</option>
-              <option value="bank_officer">Administrator</option>
+              <option value="admin">Administrator</option>
+              <option value="bank_officer">Bank Officer</option>
             </select>
         </div>
         <span class="response" data-input="fname"></span>

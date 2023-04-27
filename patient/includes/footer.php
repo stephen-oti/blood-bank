@@ -10,7 +10,7 @@
         </div>
         <div class="modal-body">
         Ending Session....
-        <h2 class="text-center">LOG OUT <small>as</small> <?php echo strtoupper($_SESSION['lname']); ?></h2>
+        <h2 class="text-center">LOG OUT <small>as</small> <?php echo strtoupper($patient_details['lname']); ?></h2>
         </div>
         <div class="modal-footer">
             <!-- <div class="row"> -->

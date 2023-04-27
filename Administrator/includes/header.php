@@ -1,5 +1,25 @@
 <?php
 include '../dbconfig.php';
+session_start();
+// $admin_id = $_SESSION['admin_id'];
+if(!isset($_SESSION['admin_id'])){
+  header("Location:login.php");
+}
+
+    // Retrieve the patient details from the database using prepared statements
+    $sql = "SELECT * FROM admin WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, 'i', $_SESSION['admin_id']);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    // Fetch the results and store the patient details in a variable
+    if ($row = mysqli_fetch_assoc($result)) {
+      $admin_details = $row;
+    }
+    
+    // Close the statement and database connection
+    mysqli_stmt_close($stmt);
 ?>
 <head>
   <meta charset="utf-8">

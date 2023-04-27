@@ -41,111 +41,83 @@
       <div class="container-fluid">
           <div class="row">
             <div class="col-12">
-                            <!-- /.card -->
 
-                            <div class="card">
-                              <!-- /.card-header -->
-                              <div class="card-body">
-                                <table id="example1" class="table table-bordered table-striped">
-                                  <thead>
-                                  <tr>
-                                    <th>Code</th>
-                                    <th>Blood bank</th>
-                                    <th>Date</th>
-                                    <th>Blood</th>
-                                    <th>Contact</th>
-                                    <!-- <th>Action</th> -->
-                                  </tr>
-                                  </thead>
-                                  <tbody>
-                                  <tr>
-                                    <td>1</td>
-                                    <td>JOOTRH Kisumu national blood bank</td>
-                                    <td>10/11/2022</td>
-                                    <td><b class="text-danger">5</b></td>
-                                    <td><b class="text-muted">mail: </b>info@jootrh.co.ke<br><b class="text-muted">contact: </b>0799699300</td>
-                                    <!-- <td>
-                                      <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-pi">
-                                        <i class="fas fa-credit-card">
-                                        </i>
-                                         Track
-                                    </a>
-                                    </td> -->
-                                  </tr>
-                                  <tr>
-                                    <td>2</td>
-                                    <td>Luanda blood bank</td>
-                                    <td>28/09/2000</td>
-                                    <td><b class="text-danger">5</b></td>
-                                    <td><b class="text-muted">mail: </b>damu@vihiga.co.ke<br><b class="text-muted">contact: </b>0799699300</td>
-                                    <!-- <td>
-                                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-pi">
-                                          <i class="fas fa-credit-card">
-                                          </i>
-                                           Track
-                                      </a>
-                                      </td> -->
-                                  </tr>
-                                  <tr>
-                                    <td>3</td>
-                                    <td>PGH blood Bank</td>
-                                    <td>05/08/2018</td>
-                                    <td><b class="text-danger">7</b></td>
-                                    <td><b class="text-muted">mail: </b>bb@pgh.co.ke<br><b class="text-muted">contact: </b>+25478288939</td>
-                                    <!-- <td>
-                                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-pi">
-                                          <i class="fas fa-credit-card">
-                                          </i>
-                                           Track
-                                      </a>
-                                      </td> -->
-                                  </tr>
-                                  <tr>
-                                    <td>4</td>
-                                    <td>KNH blood bank</td>
-                                    <td>12/10/2018</td>
-                                    <td><b class="text-danger">2</b></td>
-                                    <td><b class="text-muted">mail: </b>blood@knh.co.ke<br><b class="text-muted">contact: </b>0200067899</td>
-                                    <!-- <td>
-                                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-pi">
-                                          <i class="fas fa-credit-card">
-                                          </i>
-                                           Track
-                                      </a>
-                                      </td> -->
-                                  </tr>
+              <!-- /.card -->
+              <div class="card">
+                <!-- /.card-header -->
+                <div class="card-body">
+                  <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Blood bank</th>
+                      <th>Date</th>
+                      <th>Blood</th>
+                      <th>Contact</th>
+                      <!-- <th>Action</th> -->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                    $donor_id = $donor_details['id'];
+                        $sql = "SELECT donor_donation.`id`, donor_donation.`don_date`,donor_donation.`quantity`,
+                                blood_bank.`bank_name`, blood_bank.`email`, blood_bank.`phone` 
+                                FROM donor_donation LEFT OUTER JOIN blood_bank ON donor_donation.`bank_id` = blood_bank.`id`
+                                JOIN donor ON donor_donation.`donor_id` = donor.`id` 
+                                WHERE donor_donation.`donor_id` = $donor_id AND don_status = 4 
+                                ORDER BY don_date DESC;";
+                      
+                        // Prepare a select statement
+                        $stmt = mysqli_prepare($conn, $sql);
 
-                                  <tr>
-                                    <td>5</td>
-                                    <td>MTRRH blood bank</td>
-                                    <td>22/12/2018</td>
-                                    <td><b class="text-danger">12</b></td>
-                                    <td><b class="text-muted">mail: </b>bank@mtrh.co.ke<br><b class="text-muted">contact: </b>+25477888908</td>
-                                    <!-- <td>
-                                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-pi">
-                                            <i class="fas fa-credit-card">
-                                            </i>
-                                            Track
-                                        </a>
-                                    </td> -->
-                                    </tr>
+                        // Execute the statement
+                        mysqli_stmt_execute($stmt);
 
-                                  </tbody>
-                                  <tfoot>
-                                  <tr>
-                                    <th>Code</th>
-                                    <th>Blood bank</th>
-                                    <th>Date</th>
-                                    <th>Blood</th>
-                                    <th>Contact</th>
-                                    <!-- <th>Action</th> -->
-                                  </tr>
-                                  </tfoot>
-                                </table>
-                              </div>
-                              <!-- /.card-body -->
-                            </div>
-                            <!-- /.card -->
+                        // Bind the result variables
+                        mysqli_stmt_bind_result($stmt, $id, $dondate, $quantity, $bankname, $bankmail, $bankphone);
+
+                        // Loop through the results and create table rows
+                        $count = 1;
+                        while (mysqli_stmt_fetch($stmt)) {
+                    ?>
+                    <tr>
+                      <td><?php echo $count; ?></td>
+                      <td><?php echo $bankname; ?></td>
+                      <td><?php echo $dondate; ?></td>
+                      <td><b class="text-danger"><?php echo $quantity; ?></b><br><span class="badge badge-danger"><?php echo $donor_blood['b_name']; ?></span></td>
+                      <td><b class="text-muted">mail: </b><?php echo $bankmail; ?><br><b class="text-muted">contact: </b><?php echo $bankphone; ?></td>
+                      <!-- <td>
+                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-pi">
+                          <i class="fas fa-credit-card">
+                          </i>
+                            Track
+                      </a>
+                      </td> -->
+                    </tr>
+                    <?php
+                      $count++;
+                        }
+                        // Close the statement and database connection
+                        mysqli_stmt_close($stmt);
+                        mysqli_close($conn);
+                    ?>
+
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                      <th>Code</th>
+                      <th>Blood bank</th>
+                      <th>Date</th>
+                      <th>Blood</th>
+                      <th>Contact</th>
+                      <!-- <th>Action</th> -->
+                    </tr>
+                    </tfoot>
+                  </table>
+                </div>
+                <!-- /.card-body -->
+              </div>
+              <!-- /.card -->
                             
             </div>
           </div>

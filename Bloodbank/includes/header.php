@@ -1,6 +1,9 @@
 <?php
 include '../dbconfig.php';
 session_start();
+if(!isset($_SESSION['officer_id']) && !isset($_SESSION['bank_id'])){
+  header("Location:login.php");
+}
 // // Retreive officer variables
 $officer_id = $_SESSION['officer_id'];
 $bank_id = $_SESSION['bank_id'];
@@ -21,7 +24,7 @@ $bank_id = $_SESSION['bank_id'];
     mysqli_stmt_close($stmt);
 
 ?>
-  <?php
+<?php
 
 // Retrieve the patient details from the database using prepared statements
 $sql = "SELECT * FROM blood_bank WHERE id = ?";
@@ -39,6 +42,9 @@ if ($row = mysqli_fetch_assoc($result)) {
 mysqli_stmt_close($stmt);
 
 ?>
+
+
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">

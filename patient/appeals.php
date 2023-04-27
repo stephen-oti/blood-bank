@@ -41,16 +41,69 @@ scratch. This page gets rid of all links and provides the needed markup only.
       </div><!-- /.container-fluid -->
     </section>
 
+    <?php
+    if(isset($_POST['make-appeal'])) {
+          
+          // Get the updated values from the form
+          $bankid = $_POST['bank-id'];
+          $bloodid = $_POST['blood-id'];
+          $quantity = $_POST['quantity'];
+          $appdate = date("Y-m-d");
+          $patientid = $patient_details['id'];
+          $appstatus = 0;
+          
+        
+          // Update the patient record in the database
+          $sql = "INSERT INTO patient_appeal(app_date, bank_id, blood_id, units, app_status, patient_id) VALUES(?, ?, ?, ?, ?,?)";
+          $stmt = mysqli_prepare($conn, $sql);
+          mysqli_stmt_bind_param($stmt, "siiiii", $appdate, $bankid, $bloodid, $quantity, $appstatus, $patientid);
+          mysqli_stmt_execute($stmt);
+          if(mysqli_stmt_error($stmt)) {
+              // Display the error message with the styled alert
+              echo '<div class="alert bg-danger">Error while Making an Appeal Request, Try again later. ERROR ' . mysqli_error($conn).'</div>';
+          } else { 
+              // Display the success message with the styled alert
+              echo '<div class="alert bg-success">Blood Appeal Request Successfully Submitted</div>';
+              echo '<meta http-equiv="refresh" content="2">';
+  
+          }
+          
+          // Close the statement
+          mysqli_stmt_close($stmt);
+        }
+      ?>
+
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
+      <?php if($availability > 0){?>
+                <div class="callout callout-danger">
+                  <h5><i class="fas fa-hourglass-half"></i> Pending Appeal </h5>
+                      You Already have a pending Application thus You can only see but may not apply for more Appeals
+                </div>
+              <?php } ?>
+
+              <?php if($days > 3 || $qdate == null){ ?>
+                <div class="callout callout-warning">
+                  <h5><i class="fas fa-clock"></i> Questionnaire Update: <span class="badge badge-danger"><?php echo ($qdate == null)? "First Time Update":"$days Days Ago" ?></span></h5>
+                      You must update The questionnaire atleast 3 days before making an appeal request
+                </div>
+              <?php } ?>
         <div class="row">
             <div class="col-md-3 col-sm-6 col-12">
               <div class="info-box">
-                <span class="info-box-icon bg-info"><i class="fas fa-hand-holding-heart"></i></span>
+                <span class="info-box-icon bg-info"><i class="fas fa-trash"></i></span>
                 <div class="info-box-content">
-                  <span class="info-box-text">Total Appeals</span>
-                  <span class="info-box-number">7</span>
+                  <span class="info-box-text">Cancelled Appeals</span>
+                  <span class="info-box-number">
+                  <?php
+                  $patient_id = $patient_details['id'];
+                  $sql_appeals = "SELECT  * FROM patient_appeal WHERE patient_id = $patient_id AND app_status = 3";
+                  $query_appeals = mysqli_query($conn,$sql_appeals);
+                  echo mysqli_num_rows($query_appeals);
+                  ?>
+                  </span>
+                  <a href="history.php?appeal=cancelled" class="small-box-footer bg-danger" style="border-radius: 4px;padding:2px; text-align: center;">More info <i class="fas fa-external-link-alt"></i></a>
                 </div>
                 <!-- /.info-box-content -->
               </div>
@@ -62,8 +115,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
                   <div class="info-box-content">
                     <span class="info-box-text">Approved</span>
-                    <span class="info-box-number">4</span>
-                    <a href="#" class="small-box-footer bg-danger" style="border-radius: 4px;padding:2px; text-align: center;">More info <i class="fas fa-external-link-alt"></i></a>
+                    <span class="info-box-number"><?php
+                      $sql_approved = "SELECT  * FROM patient_appeal WHERE patient_id = $patient_id AND app_status = 1 OR app_status = 4";
+                      $query_approved = mysqli_query($conn,$sql_approved);
+                      echo mysqli_num_rows($query_approved);
+                      ?></span>
+                    <a href="history.php?appeal=approved" class="small-box-footer bg-danger" style="border-radius: 4px;padding:2px; text-align: center;">More info <i class="fas fa-external-link-alt"></i></a>
                   </div>
                   <!-- /.info-box-content -->
                 </div>
@@ -74,8 +131,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   <span class="info-box-icon bg-warning"><i class="fas fa-hourglass-half"></i></span>
                   <div class="info-box-content">
                     <span class="info-box-text">Pending</span>
-                    <span class="info-box-number">3</span>
-                    <a href="#" class="small-box-footer bg-danger" style="border-radius: 4px;padding:2px; text-align: center;">More info <i class="fas fa-external-link-alt"></i></a>
+                    <span class="info-box-number"><?php echo $availability?></span>
+                    <a href="history.php?appeal=pending" class="small-box-footer bg-danger" style="border-radius: 4px;padding:2px; text-align: center;">More info <i class="fas fa-external-link-alt"></i></a>
                   </div>
                   <!-- /.info-box-content -->
                 </div>
@@ -87,8 +144,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
   
                 <div class="info-box-content">
                   <span class="info-box-text">Rejected</span>
-                  <span class="info-box-number">0</span>
-                  <a href="#" class="small-box-footer bg-danger" style="border-radius: 4px;padding:2px; text-align: center;">More info <i class="fas fa-external-link-alt"></i></a>
+                  <span class="info-box-number"><?php
+                      $sql_rej = "SELECT  * FROM patient_appeal WHERE patient_id = $patient_id AND app_status = 1";
+                      $query_rej = mysqli_query($conn,$sql_rej);
+                      echo mysqli_num_rows($query_rej);
+                  ?></span>
+                  <a href="history.php?appeal=rejected" class="small-box-footer bg-danger" style="border-radius: 4px;padding:2px; text-align: center;">More info <i class="fas fa-external-link-alt"></i></a>
                 </div>
                 <!-- /.info-box-content -->
               </div>
@@ -105,7 +166,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <div class="card-header">
                 
                 <div class="clearfix">
-                    <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-search" title="Search"><i class="fas fa-filter"></i> Custom filter</button>
+                    <!-- <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-search" title="Search"><i class="fas fa-filter"></i> Custom filter</button> -->
                     </div>
                     <small style="font-size: small; color:red; font-style: italic; font-weight: 800;">(List generated based on the current location provided)</small>
                 </div>
@@ -118,87 +179,91 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <th>Name</th>
                     <th>Address</th>
                     <th>Contact</th>
-                    <th>Available Units <span class="text-danger">(B+)</span></th>
+                    <th>Available Units</th>
                     <th>Distance(KM)</th>
                     <th>Action</th>
                     </tr>
                     </thead>
                     <tbody>
+                    <?php
+                    $patient_status = $patient_details['p_status'];
+                    $patient_rh_factor = $patient_blood['rhesus'];
+                    $patient_blood_group = $patient_blood['b_group'];
+                    $patient_lat = $patient_details['p_lat'];
+                    $patient_lon = $patient_details['p_lon'];
+
+                    if($patient_status != null){
+                        // build the SQL query
+                        $sql = "SELECT pouch.blood_id, pouch.bank_id, SUM(pouch.units) AS total_units, 
+                        blood_bank.`bank_name`,blood_bank.`address`, blood_bank.`email`, blood_bank.`phone`, blood_bank.`county`, blood_bank.`lat`, blood_bank.`lon`,
+                        6371 * 2* ASIN(
+                            SQRT(
+                                POWER(SIN((blood_bank.`lat` - $patient_lat)* PI()/180/2), 2)+
+                                COS($patient_lat * PI()/180) * COS(blood_bank.`lat` * PI()/180)*
+                                POWER(SIN((blood_bank.`lon` - $patient_lon) * PI()/180/2),2)
+                            )
+                        ) AS distance, blood_type.`b_name`
+                        FROM pouch
+                        LEFT OUTER JOIN  blood_bank ON blood_bank.`id` = pouch.`bank_id`
+                        JOIN blood_type ON pouch.`blood_id` = blood_type.`id`
+                        WHERE DATEDIFF(NOW(), pouch.fill_date) <= 35 AND pouch.pouch_status = 1 AND blood_bank.`bank_status` = 1";
+
+                        // add conditions based on patient's blood group and rhesus factor
+                        if ($patient_blood_group === "AB") {
+                          // AB can receive from any blood group as long as the rhesus factor                       
+                          $sql .= " AND blood_type.`rhesus` = '$patient_rh_factor'";
+                          
+                        }else {
+                          // other blood groups can receive from the same blood group and O, as long as the rhesus factor is compatible
+                          if ($patient_rh_factor === "positive") {
+                          $sql .= " AND (blood_type.`b_group` = '$patient_blood_group' AND blood_type.`rhesus` = 'positive') OR (blood_type.`b_group` = 'O' AND blood_type.`rhesus` = 'positive')";
+                          } else {
+                          $sql .= " AND (blood_type.`b_group` = '$patient_blood_group' AND blood_type.`rhesus` = 'negative') OR (blood_type.`b_group` = 'O' AND blood_type.`rhesus` = 'negative')";   
+                          }
+                        }
+
+                        // order the results by distance
+                        $sql .= " ORDER BY distance ASC";
+                        // Prepare a select statement
+                        $stmt = mysqli_prepare($conn, $sql);
+
+                        // Execute the statement
+                        mysqli_stmt_execute($stmt);
+
+                        // Bind the result variables
+                        mysqli_stmt_bind_result($stmt, $blood_id, $bankid, $totalunits, $bankname, $bankaddr, $bankmail, $bankphone ,$bankcounty, $banklat, $banklon, $distance, $blood_name);
+                    
+                    
+
+                        // Loop through the results and create table rows
+                        $count = 1;
+                        while (mysqli_stmt_fetch($stmt)) {
+                    ?> 
                     <tr>
-                    <td>1</td>
-                    <td>JOOTRH Kisumu national blood bank</td>
-                    <td>P.O Box 333 -  40100, Kisumu</td>
-                    <td><b class="text-muted">mail: </b>info@jootrh.co.ke<br><b class="text-muted">contact: </b>0799699300</td>
-                    <td><span class="badge badge-danger" style="font-size: 16px;">17</span> Remaining</td>
-                    <td>14</td>
+                    <td><?php echo $count; ?></td>
+                    <td><?php echo $bankname; ?></td>
+                    <td><?php echo $bankaddr; ?></td>
+                    <td><b class="text-muted">mail: </b><?php echo $bankmail; ?><br><b class="text-muted">contact: </b><?php echo $bankphone; ?></td>
+                    <td><span class="badge badge-danger" style="font-size: 16px;"><?php echo $blood_name; ?></span><br><b class="text-danger"><?php echo $totalunits; ?></b> Remaining</td>
+                    <td><?php echo ($distance == null)? "No coordinates": round($distance, 4); ?></td>
                     <td>
-                        <a class="btn btn-danger btn-sm" href="#" href="#" data-toggle="modal" data-target="#modal-donate">
+                        <a class="btn btn-danger btn-sm btn-appeal  <?php echo ($availability > 0 || $days > 3 || $qdate == null)?"disabled":"";?>" href="#" href="#" data-toggle="modal" data-target="#modal-donate" 
+                        blood-id = '<?php echo $blood_id; ?>'
+                        bank-id = '<?php echo $bankid; ?>' >
                         <i class="fas fa-hand-holding-heart">
                         </i>
-                        Appeal
+                        <?php echo ($availability > 0 || $days > 3 || $qdate == null)?"Appeal not possible":"Appeal";?>
+                        
                     </a>
                     </td>
-                    </tr>
-                    <tr>
-                    <td>2</td>
-                    <td>Luanda blood bank</td>
-                    <td>P.O Box 4567 -  2900, Vihiga</td>
-                    <td><b class="text-muted">mail: </b>damu@vihiga.co.ke<br><b class="text-muted">contact: </b>0799699300</td>
-                    <td><span class="badge badge-danger" style="font-size: 16px;">14</span> Remaining</td>
-                    <td>5</td>
-                    <td>
-                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-donate">
-                        <i class="fas fa-hand-holding-heart">
-                        </i>
-                        Appeal
-                    </a>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td>3</td>
-                    <td>PGH blood Bank</td>
-                    <td>P.O Box 4567 -  20100, Kisumu</td>
-                    <td><b class="text-muted">mail: </b>bb@pgh.co.ke<br><b class="text-muted">contact: </b>+25478288939</td>
-                    <td><span class="badge badge-danger" style="font-size: 16px;">3</span> remaining</td>
-                    <td>43</td>
-                    <td>
-                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-donate">
-                        <i class="fas fa-hand-holding-heart">
-                        </i>
-                        Appeal
-                    </a>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td>4</td>
-                    <td>KNH blood bank</td>
-                    <td>P.O Box 0001 -  10100, Nairobi</td>
-                    <td><b class="text-muted">mail: </b>blood@knh.co.ke<br><b class="text-muted">contact: </b>0200067899</td>
-                    <td><span class="badge badge-danger" style="font-size: 16px;">29</span> Remaining</td>
-                    <td>60</td>
-                    <td>
-                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-donate">
-                        <i class="fas fa-hand-holding-heart">
-                        </i>
-                        Appeal
-                    </a>
-                    </td>
-                    </tr>
-                    <tr>
-                    <td>5</td>
-                    <td>MTRRH blood bank</td>
-                    <td>P.O Box 46894 -  40100, Eldoret</td>
-                    <td><b class="text-muted">mail: </b>bank@mtrh.co.ke<br><b class="text-muted">contact: </b>+25477888908</td>
-                    <td><span class="badge badge-danger" style="font-size: 16px;">7</span> Remaining</td>
-                    <td>20</td>
-                    <td>
-                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-donate">
-                        <i class="fas fa-hand-holding-heart">
-                        </i>
-                        Appeal
-                    </a>
-                    </td>
-                    </tr>
+                    <?php
+                      $count++;
+                        }
+                        // Close the statement and database connection
+                        mysqli_stmt_close($stmt);
+                        mysqli_close($conn);
+                      }
+                    ?>
                     </tbody>
                     <tfoot>
                     <tr>
@@ -271,25 +336,21 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">Donation Form</h4>
+          <h4 class="modal-title">Appeal Form</h4>
           <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
         <!-- <div class="card-body"> -->
-        <form class="">
+        <form method="post" name="make-appeal" role="make-appeal" action="<?php echo $_SERVER['PHP_SELF']; ?>">
             <div class="form-group">
                 <label for="">Quantity</label>
-                <input type="number" class="form-control" id="quantity" placeholder="5">
+                <input type="number" class="form-control" name="quantity" id="quantity" max="20" min= "5" placeholder="5" required>
             </div>
             <div class="form-group">
-                <label for="">Transfusion Center</label>
-                <input type="text" class="form-control" id="quantity" placeholder="Maseno Mission Hospital">
-            </div>
-            <div class="form-group">
-                <label for="">Transfusion Center Doctor</label>
-                <input type="text" class="form-control" id="quantity" placeholder="Dr. Zagreb">
+                <input type="hidden" class="form-control" name="bank-id" id="bank-id">
+                <input type="hidden" class="form-control" name="blood-id" id="blood-id">
             </div>
             <!-- /.col -->
             <div class="row">
@@ -298,7 +359,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </div>
                 <!-- /.col -->
                 <div class="col-4">
-                  <button type="submit" class="btn btn-success btn-block">Request</button>
+                  <button type="submit" name="make-appeal" class="btn btn-success btn-block">Request</button>
                 </div>
                 <!-- /.col -->
             </div>
@@ -318,6 +379,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 </div>
 <!-- ./wrapper -->
+<script>
+  var appealbtn = document.querySelectorAll('.btn-appeal');
 
+  appealbtn.forEach(function(button) {
+  button.addEventListener('click', function() {
+    var bank_id = button.getAttribute('bank-id');
+    var blood_id = button.getAttribute('blood-id');
+
+    $('#bank-id').val(bank_id);
+    $('#blood-id').val(blood_id);
+  });
+});
+</script>
 </body>
 </html>

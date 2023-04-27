@@ -36,6 +36,29 @@
       </div><!-- /.container-fluid -->
     </section>
 
+    <?php
+      if(isset($_POST['del-pouch'])) {
+        // Get the updated values from the form
+        $pouch_id = $_POST['del-id'];
+        $status = 2;
+          // Update the record in the Blood Bank table
+          $stmt = mysqli_prepare($conn, "UPDATE pouch SET pouch_status = ? WHERE id = ?");
+          mysqli_stmt_bind_param($stmt, "ii", $status, $pouch_id );
+          mysqli_stmt_execute($stmt);
+          // Check if the update was successful
+          if(mysqli_stmt_affected_rows($stmt) > 0) {
+            echo '<div class="alert bg-success">Pouch Units Successfully Deleted</div>';  
+            echo '<meta http-equiv="refresh" content="2">';
+          } else {
+            echo "<div class='alert alert-danger alert-dismissible fade show btn-delete' role='alert'>Error Deleting pouch: " . mysqli_error($conn)."</div>";
+          }
+          
+          // Close the statement
+          mysqli_stmt_close($stmt);
+        
+      }
+      
+    ?>
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
@@ -55,7 +78,7 @@
                         <thead>
                         <tr>
                         <th>#</th>
-                        <th>Pouch ID</th>
+                        <th>Pouch Code</th>
                         <th>Donor</th>
                         <th>Blood Type</th>
                         <th>Qty</th>
@@ -65,96 +88,64 @@
                         </tr>
                         </thead>
                         <tbody>
+                        <?php
+                            // Prepare a select statement
+                            $bank_id = $bank_details['id'];
+                            $sql = "SELECT pouch.`id`, pouch.`fill_date`, DATEDIFF(NOW(), fill_date) AS rem_days, pouch.`units`, pouch.`pouch_status`, donor.`fname`, donor.`lname`, blood_type.`b_name` 
+                                    FROM  pouch
+                                    LEFT OUTER JOIN donor ON pouch.`donor_id` = donor.`id`
+                                    JOIN blood_type ON pouch.`blood_id` = blood_type.`id`
+                                    WHERE pouch_status = 1 AND pouch.`bank_id` = $bank_id
+                                    HAVING rem_days <= 35
+                                    ORDER BY fill_date ASC";
+                            $stmt = mysqli_prepare($conn, $sql);
+
+                            // Execute the statement
+                            mysqli_stmt_execute($stmt);
+
+                            // Bind the result variables
+                            mysqli_stmt_bind_result($stmt, $pouch_id, $filldate,$remaining_days, $quantity, $pouch_status, $donor_fname, $donor_lname, $donor_blood_name);
+
+                            // Loop through the results and create table rows
+                            $count = 1;
+                            while (mysqli_stmt_fetch($stmt)) {
+                              $expdate = date('Y-m-d', strtotime($filldate.'+ 35 days'));
+                        ?>
                         <tr>
-                            <td>1</td>
-                            <td>1003</td>
-                            <td>Stephen Otieno</td>
-                            <td>B+</td>
-                            <td>20</td>
-                            <td>11/02/2019</td>
-                            <td>20/03/2019</td>
+                            <td><?php echo $count; ?></td>
+                            <td><?php echo $pouch_id; ?></td>
+                            <td><?php echo "$donor_fname $donor_lname"; ?></td>
+                            <td><?php echo $donor_blood_name; ?></td>
+                            <td><?php echo $quantity; ?></td>
+                            <td><?php echo $filldate; ?></td>
+                            <td><?php echo $expdate ?></td>
                             <td>
-                                <a class="btn btn-primary btn-sm" href="#" data-toggle="modal" data-target="#modal-edit">
+                                <a class="btn btn-primary btn-sm btn-edit" href="#" data-toggle="modal" data-target="#modal-edit"
+                                data-id = '<?php echo $pouch_id; ?>'
+                                data-qty = '<?php echo $quantity; ?>'
+                                >
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
+                                <a class="btn btn-danger btn-sm btn-delete" href="#" data-toggle="modal" data-target="#modal-delete"
+                                data-id = '<?php echo $pouch_id; ?>'
+                                data-blood = '<?php echo $donor_blood_name; ?>'
+                                >
                                     <i class="fas fa-times"></i>
                                 </a>
                             </td>
                         </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>1034</td>
-                            <td>Martin Ordeegard</td>
-                            <td>O-</td>
-                            <td>30</td>
-                            <td>10/01/2022</td>
-                            <td>20/02/2022</td>
-                            <td>
-                                <a class="btn btn-primary btn-sm" href="#" data-toggle="modal" data-target="#modal-edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>1035</td>
-                            <td>Emily Otis</td>
-                            <td>A+</td>
-                            <td>14</td>
-                            <td>01/06/2022</td>
-                            <td>27/08/2022</td>
-                            <td>
-                                <a class="btn btn-primary btn-sm" href="#" data-toggle="modal" data-target="#modal-edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td>1020</td>
-                            <td>Kelvin Wanjohi</td>
-                            <td>O+</td>
-                            <td>11</td>
-                            <td>20/02/2023</td>
-                            <td>20/03/2023</td>
-                            <td>
-                                <a class="btn btn-primary btn-sm" href="#" data-toggle="modal" data-target="#modal-edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>5</td>
-                            <td>1060</td>
-                            <td>Ezekiel Maina</td>
-                            <td>AB-</td>
-                            <td>42</td>
-                            <td>04/04/2023</td>
-                            <td>16/06/2023</td>
-                            <td>
-                                <a class="btn btn-primary btn-sm" href="#" data-toggle="modal" data-target="#modal-edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            </td>
-                        </tr>
+                        <?php
+                           $count++;
+                            }
+                            // Close the statement and database connection
+                            mysqli_stmt_close($stmt);
+                            // mysqli_close($conn);
+                        ?>
                         </tbody>
                         <tfoot>
                         <tr>
                             <th>#</th>
-                            <th>Pouch ID</th>
+                            <th>Pouch Code</th>
                             <th>Donor</th>
                             <th>Blood Type</th>
                             <th>Qty</th>
@@ -172,102 +163,76 @@
                 <div class="card">
                   <!-- /.card-header -->
                   <div class="card-header">  
-                    <h3>Expired Blood</h3>
-                  <!-- <div class="clearfix">
-                      <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-add" title="Search"><i class="fas fa-plus"></i> Add Unit</button>
-                      </div>
-                  </div> -->
+                    <h3>Blood Tray out</h3>
   
                   <div class="card-body">
                   <table id="example3" class="table table-bordered table-striped">
                       <thead>
-                      <tr>
-                      <th>#</th>
-                      <th>Pouch ID</th>
-                      <th>Donor</th>
-                      <th>Blood Type</th>
-                      <th>Qty</th>
-                      <th>Donation Date</th>
-                      <th>Expiry Date</th>
-                      <th>Action</th>
-                      </tr>
+                        <tr>
+                        <th>#</th>
+                        <th>Pouch ID</th>
+                        <th>Donor</th>
+                        <th>Blood Type</th>
+                        <th>Qty</th>
+                        <th>Donation Date</th>
+                        <th>Expiry Date</th>
+                        <th>Action</th>
+                        </tr>
                       </thead>
                       <tbody>
+                        <?php
+                            // Prepare a select statement
+                            $bank_id = $bank_details['id'];
+                            $sql = "SELECT pouch.`id`, pouch.`fill_date`, DATEDIFF(NOW(), fill_date) AS rem_days, pouch.`units`, pouch.`pouch_status`, donor.`fname`, donor.`lname`, blood_type.`b_name` 
+                                    FROM  pouch
+                                    LEFT OUTER JOIN donor ON pouch.`donor_id` = donor.`id`
+                                    JOIN blood_type ON pouch.`blood_id` = blood_type.`id`
+                                    WHERE (pouch_status = 2 OR pouch_status = 3 OR DATEDIFF(NOW(), fill_date) > 35) AND pouch.`bank_id` = $bank_id
+                                    ORDER BY fill_date ASC";
+                            $stmt = mysqli_prepare($conn, $sql);
+
+                            // Execute the statement
+                            mysqli_stmt_execute($stmt);
+
+                            // Bind the result variables
+                            mysqli_stmt_bind_result($stmt, $pouch_id, $filldate,$remaining_days, $quantity, $pouch_status, $donor_fname, $donor_lname, $donor_blood_name);
+
+                            // Loop through the results and create table rows
+                            $count = 1;
+                            while (mysqli_stmt_fetch($stmt)) {
+                              $expdate = date('Y-m-d', strtotime($filldate.'+ 35 days'));
+                        ?>
                       <tr>
-                          <td>1</td>
-                          <td>1003</td>
-                          <td>Stephen Otieno</td>
-                          <td>B+</td>
-                          <td>20</td>
-                          <td>11/02/2019</td>
-                          <td>20/03/2019</td>
+                          <td><?php echo $count; ?></td>
+                          <td><?php echo $pouch_id; ?></td>
+                          <td><?php echo "$donor_fname $donor_lname"; ?></td>
+                          <td><?php echo $donor_blood_name; ?></td>
+                          <td><?php echo $quantity; ?></td>
+                          <td><?php echo $filldate; ?></td>
+                          <td><?php echo $expdate ?></td>
                           <td>
-                              <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
+                            <?php if ($pouch_status == 2 ){
+                              echo "<span class='badge badge-danger'>Removed from stock</span>";
+                            }else if($pouch_status == 3){
+                              echo "<span class='badge badge-success'>Transfered to Patient</span>";
+                            }else{ ?>
+                              <a class="btn btn-danger btn-sm btn-delete" href="#" data-toggle="modal" data-target="#modal-delete"
+                                data-id = '<?php echo $pouch_id; ?>'
+                                data-blood = '<?php echo $donor_blood_name; ?>'
+                                >
                                   <i class="fas fa-times"></i>
-                                  Delete
+                                  Delete Expired Blood
                               </a>
+                              <?php } ?>
                           </td>
                       </tr>
-                      <tr>
-                          <td>2</td>
-                          <td>1034</td>
-                          <td>Martin Ordeegard</td>
-                          <td>O-</td>
-                          <td>30</td>
-                          <td>10/01/2022</td>
-                          <td>20/02/2022</td>
-                          <td>
-                              <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
-                                  <i class="fas fa-times"></i>
-                                  Delete
-                              </a>
-                          </td>
-                      </tr>
-                      <tr>
-                          <td>3</td>
-                          <td>1035</td>
-                          <td>Emily Otis</td>
-                          <td>A+</td>
-                          <td>14</td>
-                          <td>01/06/2022</td>
-                          <td>27/08/2022</td>
-                          <td>
-                              <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
-                                  <i class="fas fa-times"></i>
-                                  Delete
-                              </a>
-                          </td>
-                      </tr>
-                      <tr>
-                          <td>4</td>
-                          <td>1020</td>
-                          <td>Kelvin Wanjohi</td>
-                          <td>O+</td>
-                          <td>11</td>
-                          <td>20/02/2023</td>
-                          <td>20/03/2023</td>
-                          <td>
-                              <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
-                                  <i class="fas fa-times"></i>
-                                  Delete
-                              </a>
-                          </td>
-                      </tr>
-                      <tr>
-                          <td>5</td>
-                          <td>1060</td>
-                          <td>Ezekiel Maina</td>
-                          <td>AB-</td>
-                          <td>42</td>
-                          <td>04/04/2023</td>
-                          <td>16/06/2023</td>
-                          <td>
-                              <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-delete">
-                                  <i class="fas fa-times"></i>
-                                  Delete
-                              </a>
-                          </td>
-                      </tr>
+                      <?php
+                           $count++;
+                            }
+                            // Close the statement and database connection
+                            mysqli_stmt_close($stmt);
+                            mysqli_close($conn);
+                        ?>
                       </tbody>
                       <tfoot>
                       <tr>
@@ -306,28 +271,11 @@
         </div>
         <div class="modal-body">
         <!-- <div class="card-body"> -->
-        <form class="">
-            <div class="form-group">
-                <label for="">Blood Type</label>
-                <select name="" id="" class="form-control" >
-                    <option value="">~Select blood Group~</option>
-                    <option value="">A+</option>
-                    <option value="">B+</option>
-                    <option value="">AB+</option>
-                    <option value="">O+</option>
-                    <option value="">A-</option>
-                    <option value="">B-</option>
-                    <option value="">AB-</option>
-                    <option value="">O-</option>
-                </select>
-            </div>
+        <form  method="post" name="edit-pouch" role="edit-pouch" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+            <input type="hidden" name="pouch-id" id="edit-pouch-id">
             <div class="form-group">
                 <label for="">Qty</label>
-                <input type="number" class="form-control" id="inputEmail3" placeholder="Quantity">
-            </div>
-            <div class="form-group">
-                <label for="">Donation Date</label>
-                <input type="Date" class="form-control" id="inputEmail3" placeholder="Donation Date">
+                <input type="number" class="form-control" id="edit-qty" name="edit-qty" placeholder="Quantity">
             </div>
             <div class="row">
                 <div class="col-8">
@@ -335,7 +283,7 @@
                 </div>
                 <!-- /.col -->
                 <div class="col-4">
-                  <button type="submit" class="btn btn-success btn-block">Edit</button>
+                  <button type="submit" name="edit-pouch" class="btn btn-success btn-block">Edit</button>
                 </div>
                 <!-- /.col -->
             </div>
@@ -347,61 +295,7 @@
     <!-- /.modal-dialog -->
   </div>
   <!-- /.modal -->
-
-  <div class="modal fade" id="modal-add">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title"></h4>
-          <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-        <!-- <div class="card-body"> -->
-          <form class="">
-            <div class="form-group">
-                <label for="">Blood Type</label>
-                <select name="" id="" class="form-control" >
-                    <option value="">~Select blood Group~</option>
-                    <option value="">A+</option>
-                    <option value="">B+</option>
-                    <option value="">AB+</option>
-                    <option value="">O+</option>
-                    <option value="">A-</option>
-                    <option value="">B-</option>
-                    <option value="">AB-</option>
-                    <option value="">O-</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="">Qty</label>
-                <input type="number" class="form-control" id="inputEmail3" placeholder="Quantity">
-            </div>
-            <div class="form-group">
-                <label for="">Donation Date</label>
-                <input type="Date" class="form-control" id="inputEmail3" placeholder="Donation Date">
-            </div>
-            <div class="row">
-                <div class="col-8">
-                  <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                </div>
-                <!-- /.col -->
-                <div class="col-4">
-                  <button type="submit" class="btn btn-success btn-block">Edit</button>
-                </div>
-                <!-- /.col -->
-            </div>
-        </form>
-        </div>
-      </div>
-      <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
-  </div>
-  <!-- /.modal -->
-
-  
+ 
   <div class="modal fade" id="modal-delete">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -413,14 +307,15 @@
         </div>
         <div class="modal-body">
         Deleting....
-        <h2 class="text-center">1008 - B+</h2>
+        <h2 class="text-center"><span id="del-id-disp"></span> - <span id="del-blood-name" style="text-transform: uppercase;"></span></h2>
         </div>
-        <div class="modal-footer">
-            <!-- <div class="row"> -->
-                <button type="submit" class="btn btn-danger btn-block">Delete</button>
-            <!-- </div> -->
-
-        </div>
+        <form method="post" name="del-pouch" role="del-pouch" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <input type="hidden" name="del-id" id="del-id">
+          <div class="modal-footer">
+              <!-- <div class="row"> -->
+                  <button type="submit" name="del-pouch" class="btn btn-danger btn-block">Delete Blood Unit</button>
+          </div>
+        </form>
       </div>
       <!-- /.modal-content -->
     </div>
@@ -435,6 +330,31 @@
 
 </div>
 <!-- ./wrapper -->
+<script>
+  var editbtn = document.querySelectorAll('.btn-edit');
+  var deletebtn = document.querySelectorAll('.btn-delete');
 
+  editbtn.forEach(function(button) {
+  button.addEventListener('click', function() {
+    var id = button.getAttribute('data-id');
+    var qty = button.getAttribute('data-qty');
+
+    $('#edit-pouch-id').val(id);
+    $('#edit-qty').val(qty);
+  });
+});
+
+deletebtn.forEach(function(button) {
+  button.addEventListener('click', function() {
+    var id = button.getAttribute('data-id');
+    var blood = button.getAttribute('data-blood');
+
+    $('#del-id').val(id);
+    $('#del-id-disp').html(id);
+    $('#del-blood-name').html(blood);
+
+  });
+});
+</script>
 </body>
 </html>

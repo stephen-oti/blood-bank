@@ -27,7 +27,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>My History</h1>
+            <h1>My History : <small class="text-danger text-bold"><?php echo (isset($_GET['appeal']))? strtoupper($_GET['appeal']) :"All"; ?></small></h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
@@ -38,7 +38,29 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
       </div><!-- /.container-fluid -->
     </section>
-
+    <?php
+      if(isset($_POST['cancel-request'])) {
+          // Get the updated values from the form
+          $appid = $_POST['appid'];
+          $status = 3;
+            // Update the record in the Blood Bank table
+            $stmt = mysqli_prepare($conn, "UPDATE patient_appeal SET app_status = ? WHERE id = ?");
+            mysqli_stmt_bind_param($stmt, "ii", $status, $appid);
+            mysqli_stmt_execute($stmt);
+            // Check if the update was successful
+            if(mysqli_stmt_affected_rows($stmt) > 0) {
+              echo '<div class="alert bg-success">Appeal Cancelling Request Successful</div>';  
+              echo '<meta http-equiv="refresh" content="2">';
+            } else {
+              echo "<div class='alert alert-danger alert-dismissible fade show btn-delete' role='alert'>Error Canceling Appeal Request: " . mysqli_error($conn)."</div>";
+            }
+            
+            // Close the statement
+            mysqli_stmt_close($stmt);
+          
+        }
+      
+    ?>
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
@@ -65,91 +87,104 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <th>Contact</th>
                     <th>Requested Unit(s)</th>
                     <th>Status</th>
+                    <th>Action</th>
                     <!-- <th>Action</th> -->
                     </tr>
                     </thead>
                     <tbody>
+
+                    <?php
+                        $patient_id = $patient_details['id'];
+                        $sql = " SELECT patient_appeal.id, patient_appeal.`app_date`, patient_appeal.`units`, patient_appeal.`app_status`, patient_appeal.`comment`,
+                                blood_bank.`bank_name`, blood_bank.`address`, blood_bank.`email`, blood_bank.`phone`,
+                                blood_type.`b_name`
+                                FROM patient_appeal LEFT OUTER JOIN blood_bank ON patient_appeal.`bank_id` = blood_bank.`id`
+                                JOIN blood_type ON patient_appeal.`blood_id` = blood_type.`id`
+                                WHERE patient_appeal.`patient_id` = $patient_id";
+
+                                // Check user was looking for specific status
+                                if(isset($_GET['appeal'])){
+                                  $appeal_status = $_GET['appeal'];
+                                  if( $appeal_status == "approved"){
+                                    $sql .= " AND patient_appeal.`app_status` = 1 OR patient_appeal.`app_status` = 4";
+                                  }else if($appeal_status == "pending"){
+                                    $sql .= " AND patient_appeal.`app_status` = 0";
+                                  }else if($appeal_status == "rejected"){
+                                    $sql .= " AND patient_appeal.`app_status` = 2";
+                                  }else if($appeal_status == "cancelled"){
+                                    $sql .= " AND patient_appeal.`app_status` = 3";
+                                  }
+                                }
+                          $sql .= " ORDER BY patient_appeal.`app_date` DESC";
+                      
+                        // Prepare a select statement
+                        $stmt = mysqli_prepare($conn, $sql);
+
+                        // Execute the statement
+                        mysqli_stmt_execute($stmt);
+
+                        // Bind the result variables
+                        mysqli_stmt_bind_result($stmt, $id, $appdate, $units, $appstatus, $comment, $bankname,$bankaddress, $bankmail, $bankphone, $bloodname);
+
+                        // Loop through the results and create table rows
+                        $count = 1;
+                        while (mysqli_stmt_fetch($stmt)) {
+                    ?>
                     <tr>
-                    <td>1</td>
-                    <td>11/07/2022</td>
-                    <td>JOOTRH Kisumu national blood bank</td>
-                    <td>P.O Box 333 -  40100, Kisumu</td>
-                    <td><b class="text-muted">mail: </b>info@jootrh.co.ke<br><b class="text-muted">contact: </b>0799699300</td>
-                    <td><b class="text-muted">Blood: </b><span class="text-danger" style="font-weight: 700;">B+</span><br><b class="text-muted">units: </b>6</td>
-                    <td><span class="badge badge-warning">Pending</span></td>
-                    <!-- <td>
-                        <a class="btn btn-danger btn-sm" href="#" href="#" data-toggle="modal" data-target="#modal-view">
+                    <td><?php echo $count; ?></td>
+                    <td><?php echo $appdate; ?></td>
+                    <td><?php echo $bankname; ?></td>
+                    <td><?php echo $bankaddress; ?></td>
+                    <td><b class="text-muted">mail: </b><?php echo $bankmail; ?><br><b class="text-muted">contact: </b><?php echo $bankphone; ?></td>
+                    <td><b class="text-muted">Blood: </b><span class="text-danger" style="font-weight: 700;"><?php echo $bloodname; ?></span><br><b class="text-muted">units: </b><?php echo $units; ?></td>
+                    <td>
+                      <!-- <span class="badge badge-warning">Pending</span> -->
+                      <?php
+                        if($appstatus == 0){ 
+                          echo "<span class='badge badge-warning'>Pending</span>";
+                        }else if($appstatus == 1){
+                          echo "<span class='badge badge-success'>Approved<br>Pending Transfer</span>";
+                        }else if($appstatus == 2){
+                          echo "<span class='badge badge-danger'>Rejected</span>";
+                        }else if($appstatus == 3){
+                          echo "<span class='badge badge-danger'>Cancelled</span>";
+                        }else{
+                          echo "<span class='badge badge-success'>Transfer Completed</span>";
+                        }
+                      ?>
+                    </td>
+                    
+                    <td>
+                      <?php if($appstatus == 0){ ?>
+                        <a class="btn btn-danger btn-sm btn-cancel" href="#" href="#" data-toggle="modal" data-target="#modal-cancel" 
+                        data-id = "<?php echo $id; ?>"
+                        bank-name = "<?php echo $bankname; ?>"
+                        req-date = "<?php echo $appdate; ?>">
                         <i class="fas fa-trash">
                         </i>
                         Cancel
                     </a>
-                    </td> -->
+                    <?php
+                       }else if($appstatus == 1){
+                        echo "Visist the transfusion";
+                      }else if($appstatus == 2){
+                        echo "$comment";
+                      }else if($appstatus == 3){
+                        echo "You cancelled this Request";
+                      }else{
+                        echo "Transfer Completed ";
+                      }
+                    ?>
+
+                    </td>
                     </tr>
-                    <tr>
-                    <td>2</td>
-                    <td>07/10/2022</td>
-                    <td>Luanda blood bank</td>
-                    <td>P.O Box 4567 -  2900, Vihiga</td>
-                    <td><b class="text-muted">mail: </b>damu@vihiga.co.ke<br><b class="text-muted">contact: </b>0799699300</td>
-                    <td><b class="text-muted">Blood: </b><span class="text-danger" style="font-weight: 700;">B+</span><br><b class="text-muted">units: </b>12</td>
-                   
-                    <td><span class="badge badge-success">Success</span></td>
-                    <!-- <td>
-                        <a class="btn btn-success btn-sm" href="#" data-toggle="modal" data-target="#modal-view">
-                          <i class="fas fa-eye">
-                          </i>
-                          View
-                        </a>
-                    </td> -->
-                    </tr>
-                    <tr>
-                    <td>3</td>
-                    <td>01/11/2023</td>
-                    <td>PGH blood Bank</td>
-                    <td>P.O Box 4567 -  20100, Kisumu</td>
-                    <td><b class="text-muted">mail: </b>bb@pgh.co.ke<br><b class="text-muted">contact: </b>+25478288939</td>
-                    <td><b class="text-muted">Blood: </b><span class="text-danger" style="font-weight: 700;">B+</span><br><b class="text-muted">units: </b>6</td>
-                    <td><span class="badge badge-warning">Pending</span></td>
-                    <!-- <td>
-                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-view">
-                        <i class="fas fa-trash">
-                        </i>
-                        cancel
-                    </a>
-                    </td> -->
-                    </tr>
-                    <tr>
-                    <td>4</td>
-                    <td>07/10/2022</td>
-                    <td>KNH blood bank</td>
-                    <td>P.O Box 0001 -  10100, Nairobi</td>
-                    <td><b class="text-muted">mail: </b>blood@knh.co.ke<br><b class="text-muted">contact: </b>0200067899</td>
-                    <td><b class="text-muted">Blood: </b><span class="text-danger" style="font-weight: 700;">B+</span><br><b class="text-muted">units: </b>6</td>
-                    <td><span class="badge badge-success">Success</span></td>
-                    <!-- <td>
-                      <a class="btn btn-success btn-sm" href="#" data-toggle="modal" data-target="#modal-view">
-                        <i class="fas fa-eye">
-                        </i>
-                        View
-                      </a>
-                    </td> -->
-                    </tr>
-                    <tr>
-                    <td>5</td>
-                    <td>07/02/2023</td>
-                    <td>MTRRH blood bank</td>
-                    <td>P.O Box 46894 -  40100, Eldoret</td>
-                    <td><b class="text-muted">mail: </b>bank@mtrh.co.ke<br><b class="text-muted">contact: </b>+25477888908</td>
-                    <td><b class="text-muted">Blood: </b><span class="text-danger" style="font-weight: 700;">B+</span><br><b class="text-muted">units: </b>6</td>
-                    <td><span class="badge badge-danger">Rejected</span></td>
-                    <!-- <td>
-                        <a class="btn btn-danger btn-sm" href="#" data-toggle="modal" data-target="#modal-view">
-                        <i class="fas fa-eye">
-                        </i>
-                        View
-                    </a>
-                    </td> -->
-                    </tr>
+                    <?php
+                      $count++;
+                        }
+                        // Close the statement and database connection
+                        mysqli_stmt_close($stmt);
+                        mysqli_close($conn);
+                    ?>
                     </tbody>
                     <tfoot>
                     <tr>
@@ -158,9 +193,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <th>Name</th>
                     <th>Address</th>
                     <th>Contact</th>
-                    <th>Available units</th>
-                    <th>Distance</th>
-                    <!-- <th>Action</th> -->
+                    <th>Requested Unit(s)</th>
+                    <th>Status</th>
+                    <th>Action</th>
                     </tr>
                     </tfoot>
                 </table>
@@ -176,47 +211,26 @@ scratch. This page gets rid of all links and provides the needed markup only.
   </div>
   <!-- /.content-wrapper -->
 
-  <div class="modal fade" id="modal-view">
+  <div class="modal fade" id="modal-cancel">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">Track Application</h4>
+          <h4 class="modal-title">Cancel Request?</h4>
           <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-        <!-- <div class="card-body"> -->
-        <form class="">
-            <div class="form-group">
-              <label for="">Application</label>
-              <p class="text-muted">11/02/2022: 10:43pm - Application and processing </p>
-            </div>
-            <div class="form-group">
-                <label for="">Request Approval</label>
-                <p class="text-muted">12/02/2023 - Request Processing</p>
-            </div>
-            <div class="form-group">
-              <label for="">Pouch ID</label>
-              <p class="text-muted">12/02/2023 - #3HM08 assigned</p>
-            </div>
-            <div class="form-group">
-              <label for="">Transfusion</label>
-              <p class="text-muted">12/02/2023 - Done at Maseno Mission hospital by DR. Zagreb</p>
-            </div>
-            <!-- /.col -->
-            <div class="row">
-                <div class="col-8">
-                  <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                </div>
-                <!-- /.col -->
-                <div class="col-4">
-                  <button type="submit" class="btn btn-success btn-block">Request</button>
-                </div>
-                <!-- /.col -->
-            </div>
-        </form>
+        Cancelling....
+        <h3 class="text-center"><span id="reqdate"></span> <span class="text-danger  fas fa-arrows-alt-h"></span> <span id="bankname" style="text-transform: uppercase;"></span></h3>
         </div>
+        <form method="post" name="cancel-request" role="cancel-request" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <input type="hidden" name="appid" id="appid">
+          <div class="modal-footer">
+              <!-- <div class="row"> -->
+                  <button type="submit" name="cancel-request" class="btn btn-danger btn-block">Cancel Appeal Request</button>
+          </div>
+        </form>
       </div>
       <!-- /.modal-content -->
     </div>
@@ -224,13 +238,26 @@ scratch. This page gets rid of all links and provides the needed markup only.
   </div>
   <!-- /.modal -->
 
-
   <!-- Footer -->
   <?php include 'includes/footer.php'; ?>
   <!-- /.Footer -->
 
 </div>
 <!-- ./wrapper -->
+<script>
+    var cancelbtn = document.querySelectorAll('.btn-cancel');
+
+  cancelbtn.forEach(function(button) {
+  button.addEventListener('click', function() {
+    var app_id = button.getAttribute('data-id');
+    var app_bank = button.getAttribute('bank-name');
+    var req_date = button.getAttribute('req-date');
+    $('#appid').val(app_id);
+    $('#bankname').html(app_bank );
+    $('#reqdate').html(req_date);
+  });
+});
+</script>
 
 </body>
 </html>

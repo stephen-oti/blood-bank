@@ -137,17 +137,27 @@
       $("#example1").DataTable({
         "responsive": true,
         "autoWidth": false,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
         
       });
       $("#example3").DataTable({
-        "responsive": true,
+        "paging": true,
+        "lengthChange": false,
+        "searching": true,
+        "ordering": true,
+        "info": true,
         "autoWidth": false,
+        "responsive": true,
         
       });
       $('#example2').DataTable({
         "paging": true,
         "lengthChange": false,
-        "searching": false,
+        "searching": true,
         "ordering": true,
         "info": true,
         "autoWidth": false,
@@ -155,32 +165,3 @@
       });
     });
   </script>
-  <script>
-//   var editbtn = document.querySelectorAll('.btn-edit');
-  
-//   editbtn.forEach(function(button) {
-//   button.addEventListener('click', function() {
-//     var off_id = button.getAttribute('data-id');
-//     // console.log("The Edit Id: " +off_id);
-//     $.ajax({
-//             url: "action.php",
-//             type: "POST",
-//             data: {
-//                 id: off_id,
-//                 action: "returnOfficer"
-//             },
-//             dataType: "json",
-//             success: function(response) {
-//                 // Process the response here
-//                 // console.log(response);
-//                 $('#eoffid').val(response.id);
-//                 $('#efname').val(response.firstname);
-//                 $('#elname').val(response.lastname);
-//                 $('#email').val(response.email);
-//                 $('#ephone').val(response.phone);
-//                 $('#epsword').val(response.pass); 
-//             }
-//         });
-//   });
-// });
-</script>

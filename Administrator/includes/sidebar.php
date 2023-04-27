@@ -22,7 +22,7 @@
                 </p>
             </a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" >
             <a href="bloodbank.php" class="nav-link bg-info">
                 <i class="nav-icon  fas fa-university"></i>
                 <p>
@@ -30,7 +30,8 @@
                 </p>
             </a>
           </li>
-          <li class="nav-item">
+
+          <li class="nav-item" <?php echo ($admin_details['a_role'] != "approval")? "style='display: none;';" : "" ; ?>>
             <a href="approval.php" class="nav-link bg-info">
                 <i class="nav-icon  fas fa-inbox"></i>
                 <p>

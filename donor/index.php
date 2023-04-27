@@ -17,30 +17,13 @@
   <?php include 'includes/sidebar.php'?>
   <!-- /.Main Sidebar Container -->
   
-  <?php
 
-    // Retrieve the patient details from the database using prepared statements
-    $sql = "SELECT * FROM donor WHERE id = ?";
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, 'i', $_SESSION['id']);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-
-    // Fetch the results and store the patient details in a variable
-    if ($row = mysqli_fetch_assoc($result)) {
-      $donor_details = $row;
-    }
-    
-    // Close the statement and database connection
-    mysqli_stmt_close($stmt);
-
-  ?>
     <?php
 
     // Retrieve the patient details from the database using prepared statements
     $sql = "SELECT q1, q2, q3, q4, q5, q6, q7, q8, q9, q10 FROM questionnaire WHERE d_id = ?";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, 'i', $_SESSION['id']);
+    mysqli_stmt_bind_param($stmt, 'i', $_SESSION['donor_id']);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
@@ -55,7 +38,7 @@
   <?php
   // Check if the form has been submitted
   if(isset($_POST['update-pi'])) {
-    $donor_id = $_SESSION['id'];
+    $donor_id = $_SESSION['donor_id'];
     // Get the updated values from the form
     $blood_group = intval($_POST['blood_group']);
     $latitude = $_POST['lat'];
@@ -71,9 +54,9 @@
       $medical_condition = "None";
     }
   if ($_FILES['customFile']['size'] > 0) {
-    $file_name = 'donor_' . str_pad($_SESSION['id'], 7, '0', STR_PAD_LEFT) . '_' . time() . '.pdf';
+    $file_name = 'donor_' . str_pad($_SESSION['donor_id'], 7, '0', STR_PAD_LEFT) . '_' . time() . '.pdf';
     // Search for existing files with the same name pattern
-    $existing_files = glob("uploads/donor_" . str_pad($_SESSION['id'], 7, '0', STR_PAD_LEFT) . '_*.pdf');
+    $existing_files = glob("uploads/donor_" . str_pad($_SESSION['donor_id'], 7, '0', STR_PAD_LEFT) . '_*.pdf');
 
 
     // Delete any existing files
@@ -130,7 +113,7 @@
   
       // Set the parameters and execute the statement
       $user_type = 'donor';
-      $d_id = $_SESSION['id'];
+      $d_id = $_SESSION['donor_id'];
       mysqli_stmt_execute($stmt);
   
       // Check if the update was successful
@@ -148,7 +131,7 @@
 ?>
 <?php
   if(isset($_POST['update-profile'])) {
-    $donor_id = $_SESSION['id'];
+    $donor_id = $_SESSION['donor_id'];
     // Get the updated values from the form
     $fname = $_POST['fname'];
     $lname = $_POST['lname'];
@@ -208,7 +191,12 @@
   
                 <div class="info-box-content">
                   <span class="info-box-text">My Donations</span>
-                  <span class="info-box-number">7</span>
+                  <span class="info-box-number"><?php
+                  $donor_id = $donor_details['id'];
+                  $sql_successful_donations = "SELECT  * FROM donor_donation WHERE donor_id = $donor_id  AND don_status = 1";
+                  $query = mysqli_query($conn,$sql_successful_donations);
+                  echo mysqli_num_rows($query);
+                  ?></span>
                 </div>
                 <!-- /.info-box-content -->
               </div>
@@ -220,11 +208,15 @@
                 <span class="info-box-icon bg-info"><i class="fas fa-calendar-alt"></i></span>
   
                 <div class="info-box-content">
-                  <span class="info-box-text">Recommended Next Donation</span>
+                  <span class="info-box-text">Days to next Donation</span>
                   <span class="info-box-number"><?php if($donor_details['d_next'] == Null) { 
                     echo "Pending first Donation";
                   } else {
-                    echo $donor_details['d_next'];
+                    if($donor_details['donation_days'] < 0){
+                      echo "$days_left Days Recommended";
+                    }else if($donor_details['donation_days'] >= 0){
+                      echo "You can donate";
+                    }
                   }
                     ?></span>
                 </div>
@@ -262,6 +254,17 @@
             <!-- /.col -->
           </div>
           <!-- /.row -->
+          <?php if($days > 2 || $qdate == null){ ?>
+              <div class="callout callout-warning">
+                <h5><i class="fas fa-clock"></i> Questionnaire Update: <span class="badge badge-danger"><?php echo ($qdate == null)? "First Time Update":"$days Days Ago" ?></span></h5>
+                    <?php echo ($qdate == null)? "To Apply for blood Donation Requests Kindly Update questionnaire here:":" You must update The questionnaire at least 2 days to be considered for donation request update it here: "; 
+                    echo "<button type='button' class='btn btn-info' data-toggle='modal' data-target='#modal-qedit'>
+                    <i class='fas fa-edit'></i> Update/Fill Questionnaire
+                  </button>"?>
+                    
+              </div>
+          <?php } ?>
+
         <div class="row">
           <div class="col-md-6">
 
@@ -659,7 +662,7 @@
               <div class="col-sm-3">
                 <select name="q9" id="q9" class="form-control">
                   <option value="no" <?php echo ($donor_quiz['q9'] == 'no') ? 'selected' : ''; ?>>No</option>
-                  <option value="yes" <?php echo ($donort_quiz['q9'] == 'yes') ? 'selected' : ''; ?>>Yes</option>
+                  <option value="yes" <?php echo ($donor_quiz['q9'] == 'yes') ? 'selected' : ''; ?>>Yes</option>
                 </select>
               </div>
             </div>

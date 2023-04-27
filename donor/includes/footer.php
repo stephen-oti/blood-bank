@@ -12,7 +12,7 @@
         </div>
         <div class="modal-body">
         Ending Session....
-        <h2 class="text-center"><?php echo strtoupper($_SESSION['fname'])." ". strtoupper($_SESSION['lname']); ?></h2>
+        <h2 class="text-center"><?php echo strtoupper($donor_details['fname'])." ". strtoupper($donor_details['lname']); ?></h2>
         </div>
         <div class="modal-footer">
             <!-- <div class="row"> -->

@@ -39,30 +39,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <?php include 'includes/sidebar.php'?>
   <!-- /.Main Sidebar Container -->
   
-  <?php
 
-    // Retrieve the patient details from the database using prepared statements
-    $sql = "SELECT * FROM patient WHERE id = ?";
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, 'i', $_SESSION['id']);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-
-    // Fetch the results and store the patient details in a variable
-    if ($row = mysqli_fetch_assoc($result)) {
-      $patient_details = $row;
-    }
-    
-    // Close the statement and database connection
-    mysqli_stmt_close($stmt);
-
-  ?>
     <?php
 
     // Retrieve the patient details from the database using prepared statements
     $sql = "SELECT q1, q2, q3, q4, q5, q6, q7, q8, q9, q10 FROM questionnaire WHERE p_id = ?";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, 'i', $_SESSION['id']);
+    mysqli_stmt_bind_param($stmt, 'i', $patient_details['id']);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
@@ -77,7 +60,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <?php
   // Check if the form has been submitted
   if(isset($_POST['update-pi'])) {
-    $patient_id = $_SESSION['id'];
+    $patient_id = $patient_details['id'];
     // Get the updated values from the form
     $blood_group = intval($_POST['blood_group']);
     $latitude = $_POST['lat'];
@@ -94,9 +77,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     }
     
   if ($_FILES['customFile']['size'] > 0) {
-    $file_name = 'patient_' . str_pad($_SESSION['id'], 7, '0', STR_PAD_LEFT) . '_' . time() . '.pdf';
+    $file_name = 'patient_' . str_pad($patient_details['id'], 7, '0', STR_PAD_LEFT) . '_' . time() . '.pdf';
     // Search for existing files with the same name pattern
-    $existing_files = glob("uploads/patient_" . str_pad($_SESSION['id'], 7, '0', STR_PAD_LEFT) . '_*.pdf');
+    $existing_files = glob("uploads/patient_" . str_pad($patient_details['id'], 7, '0', STR_PAD_LEFT) . '_*.pdf');
 
 
     // Delete any existing files
@@ -153,7 +136,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   
       // Set the parameters and execute the statement
       $user_type = 'patient';
-      $p_id = $_SESSION['id'];
+      $p_id = $patient_details['id'];
       mysqli_stmt_execute($stmt);
   
       // Check if the update was successful
@@ -199,7 +182,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
       
                     <div class="info-box-content">
                       <span class="info-box-text">My Appeals</span>
-                      <span class="info-box-number">7</span>
+                      <span class="info-box-number"><?php
+                        $patient_id = $patient_details['id'];
+                        $sql_appeals = "SELECT  * FROM patient_appeal WHERE patient_id = $patient_id";
+                        $query_appeals = mysqli_query($conn,$sql_appeals);
+                        echo mysqli_num_rows($query_appeals);
+                      ?></span>
                     </div>
                     <!-- /.info-box-content -->
                   </div>
@@ -211,7 +199,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
                       <span class="info-box-icon bg-danger"><i class="fas fa-heartbeat"></i></span>
                       <div class="info-box-content">
                         <span class="info-box-text">My Transfusions</span>
-                        <span class="info-box-number">3</span>
+                        <span class="info-box-number"><?php
+                      $sql_transfused = "SELECT  * FROM patient_appeal WHERE patient_id = $patient_id AND app_status = 4";
+                      $query_transfused = mysqli_query($conn,$sql_transfused);
+                      echo mysqli_num_rows($query_transfused);
+                      ?></span>
                       </div>
                       <!-- /.info-box-content -->
                     </div>
@@ -219,11 +211,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   </div>
                 <div class="col-md-4 col-sm-6 col-12">
                   <div class="info-box">
-                    <span class="info-box-icon bg-info"><i class="fas fa-calendar-alt"></i></span>
+                    <span class="info-box-icon bg-info"><i class="fas fa-check"></i></span>
       
                     <div class="info-box-content">
-                      <span class="info-box-text">Upcoming Transfusion</span>
-                      <span class="info-box-number">12/02/2023</span>
+                      <span class="info-box-text">Elligibility</span>
+                      <span class="info-box-number"><?php echo ($days > 3 || $qdate == null || $availability > 0)? "<b class= 'text-danger'>INELLIGIBLE:</b> <a href = 'appeals.php'>Read Callouts</a>":"Elligible" ?></span>
                     </div>
                     <!-- /.info-box-content -->
                   </div>
@@ -254,13 +246,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                       <?php 
                          if($patient_details['blood_id'] != NUll){
                           $sql = "SELECT id, b_name FROM blood_type WHERE id = ?";
-                          $stmt = mysqli_prepare($conn, $sql);
-                          mysqli_stmt_bind_param($stmt, "i", $patient_details['blood_id']);
-                          mysqli_stmt_execute($stmt);
-                          mysqli_stmt_bind_result($stmt, $id, $bname);
-                          mysqli_stmt_fetch($stmt);
-                          mysqli_stmt_close($stmt);
-                          echo $bname;
+                          echo $patient_blood['b_name'];
                          }
                       ?></span></h2>
                     <?php } ?>
@@ -593,7 +579,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
         <?php
           if(isset($_POST['update-profile'])) {
-            $patient_id = $_SESSION['id'];
+            $patient_id = $patient_details['id'];
             // Get the updated values from the form
             $fname = $_POST['fname'];
             $lname = $_POST['lname'];

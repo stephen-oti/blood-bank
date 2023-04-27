@@ -1,25 +1,64 @@
 <?php 
 session_start();
 include '../dbconfig.php';
-
-// Retrieve the user details from the database using prepared statements
-$sql = "SELECT id, fname, lname FROM patient WHERE email = ? AND pword = ?";
+if(!isset($_SESSION['patient_id'])){
+  header("Location:login.php");
+}
+// Retrieve the patient details from the database using prepared statements
+$sql = "SELECT * FROM patient WHERE id = ?";
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, 'ss', $_SESSION['mail'], $_SESSION['pword']);
+mysqli_stmt_bind_param($stmt, 'i', $_SESSION['patient_id']);
 mysqli_stmt_execute($stmt);
-mysqli_stmt_store_result($stmt);
-mysqli_stmt_bind_result($stmt, $id, $fname,$lname);
+$result = mysqli_stmt_get_result($stmt);
 
-// Fetch the results and store the user details in session variables
-if (mysqli_stmt_fetch($stmt)) {
-  $_SESSION['id'] = $id;
-  $_SESSION['fname'] = $fname;
-  $_SESSION['lname'] = $lname;
+// Fetch the results and store the patient details in a variable
+if ($row = mysqli_fetch_assoc($result)) {
+  $patient_details = $row;
 }
 
-// Close the statement
+// Close the statement and database connection
 mysqli_stmt_close($stmt);
+
 ?>
+
+<?php
+
+  $user_blood = $patient_details['blood_id'];
+  $stmnt = mysqli_prepare($conn, "SELECT * FROM blood_type WHERE id = ?");
+  mysqli_stmt_bind_param($stmnt, 'i', $user_blood);
+  mysqli_stmt_execute($stmnt);
+  $results = mysqli_stmt_get_result($stmnt);
+  if ($rows = mysqli_fetch_assoc($results)) {
+    $patient_blood = $rows;
+  }
+
+  mysqli_stmt_close($stmnt);
+
+?>
+<?php
+  $patient_status = $patient_details['p_status'];
+    if($patient_status != null){
+    $patient_id = $patient_details['id'];
+    }
+    //Checking if the donor already has a Pending donation record
+    $sqlappeal = "SELECT * FROM patient_appeal WHERE patient_id = $patient_id AND app_status = 0";
+    $queryappeal =  mysqli_query($conn,$sqlappeal);
+    $availability = mysqli_num_rows($queryappeal);
+
+    $sqlquest = "SELECT last_update_time FROM questionnaire WHERE user_type = 'patient' AND  p_id = $patient_id";
+    $questquery = mysqli_query($conn, $sqlquest);
+    $questionnaire = mysqli_fetch_array($questquery);
+    $qdate = $questionnaire['last_update_time'];
+    $convertedate = new DateTime($qdate);
+    $today = new DateTime();
+    if ($convertedate) {
+      $days = $today->diff($convertedate)->days;
+    } else {
+      $days = null;
+    }
+
+
+  ?>
 
 <head>
   <meta charset="utf-8">

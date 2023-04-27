@@ -16,7 +16,7 @@
       <li class="nav-item dropdown">
           <div class="user-panel  d-flex">
             <div class="info">
-                <a href="#" class="d-block text-white"><?php echo strtoupper($_SESSION['lname']).", ".$_SESSION['fname'];?></a>
+                <a href="#" class="d-block text-white"><?php echo strtoupper($patient_details['lname']).", ".$patient_details['fname'];?></a>
               </div>
             <div class="image">
               <img src="../dist/img/avatar-patient.png" class="img-circle" alt="User Image">

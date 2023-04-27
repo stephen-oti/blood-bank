@@ -30,7 +30,7 @@
       $psword = $_POST['psword'];
       
       // Create a mysqli connection
-      $sql = "SELECT id, fname,lname FROM patient WHERE email=? AND pword=?";
+      $sql = "SELECT id FROM patient WHERE email=? AND pword=? AND p_status != 2";
       // Prepare the statement
       $stmt = mysqli_prepare($conn, $sql);
       
@@ -41,7 +41,7 @@
       mysqli_stmt_execute($stmt);
       
       // Bind the results
-      mysqli_stmt_bind_result($stmt, $id, $fname,$lname);
+      mysqli_stmt_bind_result($stmt, $id);
       
       // Fetch the results
       mysqli_stmt_fetch($stmt);
@@ -55,10 +55,8 @@
           session_start();
           
           // Set session variables
-          $_SESSION['id'] = $id;
-          $_SESSION['fname'] = $fname;
-          $_SESSION['lname'] = $lname;
-          
+          $_SESSION['patient_id'] = $id;
+
           // Redirect to the user's profile page
           echo '<div class="alert bg-success">Login Successful</div>';
 
@@ -95,7 +93,7 @@
         <div class="row">
           <div class="col-8">
             <div class="icheck-primary">
-              <input type="checkbox" id="remember">
+              <input type="checkbox" id="remember" required>
               <label for="remember">
                 Remember Me
               </label>

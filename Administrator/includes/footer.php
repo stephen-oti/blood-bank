@@ -1,3 +1,30 @@
+<?php
+  if(isset($_POST['update-admin-profile'])) {
+    // Get the updated values from the form
+    $admid = $_POST['admid'];
+    $fname = $_POST['fname'];
+    $lname = $_POST['lname'];
+    $mail = $_POST['mail'];
+    $phone = $_POST['phone'];
+    $pword = $_POST['psword'];
+
+      // Update the record in the Blood Bank table
+      $stmt = mysqli_prepare($conn, "UPDATE admin SET fname = ?, lname = ?, email = ?, phone = ?, pword = ? WHERE id = ?");
+      mysqli_stmt_bind_param($stmt, "sssssi", $fname, $lname, $mail, $phone, $pword, $admid);
+      mysqli_stmt_execute($stmt);
+      // Check if the update was successful
+      if(mysqli_stmt_affected_rows($stmt) > 0) {
+        echo '<div class="alert bg-success">Admin Profile updated</div>';  
+        echo '<meta http-equiv="refresh" content="2">';
+      } else {
+        echo "<div class='alert alert-danger alert-dismissible fade show btn-delete' role='alert'>Error updating profile: " . mysqli_error($conn)."</div>";
+      }
+      
+      // Close the statement
+      mysqli_stmt_close($stmt);
+    
+  }
+?>
 <div class="modal fade" id="modal-acc">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -8,9 +35,10 @@
           </button>
         </div>
         <div class="modal-body">
-          <form action="#" method="post">
+        <form method="post" name="update-admin-profile" role="update-admin-profile" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <input type="hidden"  name="admid" value="<?php echo $admin_details['id'] ? $admin_details['id'] : '' ?>">
             <div class="input-group mb-3">
-              <input type="text" class="form-control" name="fname" placeholder="First name">
+              <input type="text" class="form-control"  name="fname" placeholder="First name" value="<?php echo $admin_details['fname'] ? $admin_details['fname'] : '' ?>">
               <div class="input-group-append">
                 <div class="input-group-text">
                   <span class="fas fa-user"></span>
@@ -19,7 +47,7 @@
             </div>
 
             <div class="input-group mb-3">
-                <input type="text" class="form-control" name="lname" placeholder="Last Name">
+                <input type="text" class="form-control"  name="lname" placeholder="Last Name" value="<?php echo $admin_details['lname'] ? $admin_details['lname'] : '' ?>">
                 <div class="input-group-append">
                   <div class="input-group-text">
                     <span class="fas fa-user"></span>
@@ -27,7 +55,7 @@
                 </div>
             </div>
             <div class="input-group mb-3">
-              <input type="email" class="form-control" name="mail" placeholder="Email">
+              <input type="email" class="form-control" name="mail" placeholder="Email" value="<?php echo $admin_details['email'] ? $admin_details['email'] : '' ?>">
               <div class="input-group-append">
                 <div class="input-group-text">
                   <span class="fas fa-envelope"></span>
@@ -35,28 +63,29 @@
               </div>
             </div>
             <div class="input-group mb-3">
-                <input type="tel" class="form-control" name="phone" placeholder="Phone">
+                <input type="tel" class="form-control" name="phone" placeholder="Phone" value="<?php echo $admin_details['phone'] ? $admin_details['phone'] : '' ?>">
                 <div class="input-group-append">
                   <div class="input-group-text">
                     <span class="fas fa-phone"></span>
                   </div>
                 </div>
             </div>
-            <div class="input-group mb-3">
-              <input type="password" class="form-control" placeholder="Password">
+            <div class="input-group">
+              <input type="password" class="form-control" name="psword" placeholder="Password" value="<?php echo $admin_details['pword'] ? $admin_details['pword'] : '' ?>">
               <div class="input-group-append">
                 <div class="input-group-text">
                   <span class="fas fa-lock"></span>
                 </div>
               </div>
             </div>
-            <div class="row">
+
+            <div class="row" style="padding-top:10px;">
               <div class="col-8">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
               </div>
               <!-- /.col -->
               <div class="col-4">
-                <button type="submit" class="btn btn-success btn-block">Update</button>
+                <button type="submit" name="update-admin-profile" id="update-admin-profile" class="btn btn-success btn-block">Update</button>
               </div>
               <!-- /.col -->
             </div>
@@ -69,15 +98,6 @@
   </div>
   <!-- /.modal -->
   
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark bg-navy">
-    <!-- Control sidebar content goes here -->
-    <div class="p-3">
-      <h5>Logout</h5>
-      <p>content</p>
-    </div>
-  </aside>
-  <!-- /.control-sidebar -->
 
   <!-- Main Footer -->
   <footer class="main-footer">

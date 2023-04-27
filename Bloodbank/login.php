@@ -163,6 +163,9 @@
         </div>
       </form>
       <!-- /.social-auth-links -->
+      <p class="mb-0">
+        <a href="../RegistrationReq/requestreg.php" class="text-center">Request Registration as Bank Officer?</a>
+      </p>
     </div>
     <!-- /.login-card-body -->
   </div>

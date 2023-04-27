@@ -113,7 +113,7 @@
                 Explore blood donation and transfusion. 
                 Stay informed on the latest news and treatments.</p>
               <ul class="d-flex">
-                <li><a href="../donor/register.php" class="main-btn wow fadeInLeftBig bg-danger" style="border:none" data-wow-duration="3s" data-wow-delay="0.8s">Register Now!</a></li>
+                <li><a href="donor/register.php" class="main-btn wow fadeInLeftBig bg-danger" style="border:none" data-wow-duration="3s" data-wow-delay="0.8s">Register Now!</a></li>
                 <li><a href="https://www.youtube.com/watch?v=6emUjt2-Jok&ab_channel=ImpactLifeBlood" class="header-video venobox wow fadeInLeftBig"
                   data-autoplay="true" data-vbtype="video" data-wow-duration="3s" data-wow-delay="1.2s"><i
                       class="fas fa-play"></i></a></li>
@@ -325,6 +325,34 @@
       </div>
 
       <!-- **************************************************************************************** -->
+      <?php
+          // Assume $conn is the database connection variable
+          include_once 'dbconfig.php';
+          $sql = " SELECT 
+                      (SUM(CASE WHEN blood_type.`id` = 1 THEN pouch.units ELSE 0 END)/100) * 100 AS A_pos,
+                      (SUM(CASE WHEN blood_type.`id` = 2 THEN pouch.units ELSE 0 END)/75) * 100 AS A_neg,
+                      (SUM(CASE WHEN blood_type.`id` = 3 THEN pouch.units ELSE 0 END)/75) * 100 AS B_pos,
+                      (SUM(CASE WHEN blood_type.`id` = 4 THEN pouch.units ELSE 0 END)/75) * 100 AS B_neg,
+                      (SUM(CASE WHEN blood_type.`id` = 5 THEN pouch.units ELSE 0 END)/200) * 100 AS AB_pos,
+                      (SUM(CASE WHEN blood_type.`id` = 6 THEN pouch.units ELSE 0 END)/150) * 100 AS AB_neg,
+                      (SUM(CASE WHEN blood_type.`id` = 7 THEN pouch.units ELSE 0 END)/200) * 100 AS O_pos,
+                      (SUM(CASE WHEN blood_type.`id` = 8 THEN pouch.units ELSE 0 END)/150) * 100 AS O_neg
+                    FROM pouch
+                    LEFT OUTER JOIN blood_bank ON blood_bank.id = pouch.bank_id
+                    JOIN blood_type ON pouch.blood_id = blood_type.id
+                    WHERE DATEDIFF(NOW(), fill_date) <= 35 AND pouch_status = 1";
+
+          // Bind the parameter and execute the statement
+          $stmt = mysqli_prepare($conn, $sql); // Assuming $bank_id is the value you want to bind
+          mysqli_stmt_execute($stmt);
+
+          // Fetch the result and store in variables
+          mysqli_stmt_bind_result($stmt, $A_pos, $A_neg, $B_pos, $B_neg, $AB_pos, $AB_neg, $O_pos, $O_neg);
+          mysqli_stmt_fetch($stmt);
+
+          // Close the statement
+          mysqli_stmt_close($stmt);
+        ?>
       <div class="row wow fadeInLeftBig" data-wow-duration="3s" data-wow-delay="0.5s">
         <div class="col-sm-3">
           <div class="card">
@@ -333,7 +361,7 @@
               <div class="card-text">
                 <img src="assets/img/blood drop.svg" class="img-fluid mx-auto d-block " style="max-width: 100px;" alt="blood-group-a-positive" />
                 <div class="progress" style="height:40px">
-                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 18%" aria-valuenow="18" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
+                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?php echo ($A_pos > 100)?" 100 ": round($A_pos); ?>%" aria-valuenow="<?php echo ($A_pos > 100)?" 100 ": round($A_pos); ?>" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
                 </div>
               </div>
             </div>
@@ -346,7 +374,7 @@
               <div class="card-text">
                 <img src="assets/img/blood drop.svg" class="img-fluid mx-auto d-block " style="max-width: 100px;" alt="blood-group-a-positive" />
                 <div class="progress" style="height:40px">
-                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
+                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?php echo ($B_pos > 100)?" 100 ": round($B_pos); ?>%" aria-valuenow="<?php echo ($B_pos > 100)?" 100 ": round($B_pos); ?>" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
                 </div>
               </div>
             </div>
@@ -359,7 +387,7 @@
               <div class="card-text">
                 <img src="assets/img/blood drop.svg" class="img-fluid mx-auto d-block " style="max-width: 100px;" alt="blood-group-a-positive" />
                 <div class="progress" style="height:40px">
-                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 92%" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
+                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?php echo ($AB_pos > 100)?" 100 ": round($AB_pos); ?>%" aria-valuenow="<?php echo ($AB_pos > 100)?" 100 ": round($AB_pos); ?>" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
                 </div>
               </div>
             </div>
@@ -372,7 +400,7 @@
               <div class="card-text">
                 <img src="assets/img/blood drop.svg" class="img-fluid mx-auto d-block " style="max-width: 100px;" alt="blood-group-a-positive" />
                 <div class="progress" style="height:40px">
-                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
+                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?php echo ($O_pos > 100)?" 100 ": round($O_pos); ?>%" aria-valuenow="<?php echo ($A_pos > 100)?" 100 ": round($A_pos); ?>" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
                 </div>
               </div>
             </div>
@@ -388,7 +416,7 @@
               <div class="card-text">
                 <img src="assets/img/blood drop.svg" class="img-fluid mx-auto d-block " style="max-width: 100px;" alt="blood-group-a-positive" />
                 <div class="progress" style="height:40px">
-                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
+                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?php echo ($A_neg > 100)?" 100 ": round($A_neg); ?>%" aria-valuenow="<?php echo ($A_neg > 100)?" 100 ": round($A_neg); ?>" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
                 </div>
               </div>
             </div>
@@ -401,7 +429,7 @@
               <div class="card-text">
                 <img src="assets/img/blood drop.svg" class="img-fluid mx-auto d-block " style="max-width: 100px;" alt="blood-group-a-positive" />
                 <div class="progress" style="height:40px">
-                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 47%" aria-valuenow="47" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
+                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?php echo ($B_neg > 100)?" 100 ": round($B_neg); ?>%" aria-valuenow="<?php echo ($B_neg > 100)?" 100 ": round($B_neg); ?>" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
                 </div>
               </div>
             </div>
@@ -414,7 +442,7 @@
               <div class="card-text">
                 <img src="assets/img/blood drop.svg" class="img-fluid mx-auto d-block " style="max-width: 100px;" alt="blood-group-a-positive" />
                 <div class="progress" style="height:40px">
-                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
+                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?php echo ($AB_neg > 100)?" 100 ": round($AB_neg); ?>%" aria-valuenow="<?php echo ($AB_neg > 100)?" 100 ": round($AB_neg); ?>" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
                 </div>
               </div>
             </div>
@@ -427,7 +455,7 @@
               <div class="card-text">
                 <img src="assets/img/blood drop.svg" class="img-fluid mx-auto d-block " style="max-width: 100px;" alt="blood-group-a-positive" />
                 <div class="progress" style="height:40px">
-                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
+                  <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?php echo ($O_neg > 100)?" 100 ": round($O_neg); ?>%" aria-valuenow="<?php echo ($O_neg > 100)?" 100 ": round($O_neg); ?>" aria-valuemin="0" aria-valuemax="100"><strong style="font-size: 20px;"></strong></div>
                 </div>
               </div>
             </div>
@@ -708,10 +736,11 @@
                   <li><a data-scroll-nav="0" href="#">Home</a></li>
                   <li><a data-scroll-nav="5" href="#faq">FAQ</a></li>
                   <li><a data-scroll-nav="4" href="#status">Status</a></li>
-                  <li><a href="../Administrator/login.php">Admin Login</a></li>
-                  <li><a href="../Bloodbank/login.php">Bank Login</a></li>
-                  <li><a href="../donor/login.php">Donor Login</a></li>
-                  <li><a href="../patient/login.php">Patient Login</a></li>
+                  <li><a href="Administrator/login.php">Admin Login</a></li>
+                  <li><a href="Bloodbank/login.php">Bank Login</a></li>
+                  <li><a href="donor/login.php">Donor Login</a></li>
+                  <li><a href="patient/login.php">Patient Login</a></li>
+                  <li><a href="RegistrationReq/requestreg.php">Request Admin Registration</a></li>
                   
 
                 </ul>

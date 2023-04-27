@@ -30,13 +30,28 @@
                 </p>
             </a>
           </li>
-          <li class="nav-item">
-            <a href="inter.php" class="nav-link bg-info">
-                <i class="nav-icon fas fa-exchange-alt"></i>
-                <p>
-                 Inter-Bank Appeal
-                </p>
+          <li class="nav-item has-treeview menu-open">
+            <a href="#" class="nav-link active bg-info" >
+              <i class="nav-icon  fas fa-exchange-alt"></i>
+              <p>
+                Inter Bank
+                <i class="right fas fa-angle-left"></i>
+              </p>
             </a>
+            <ul class="nav nav-treeview" style="background-color: #003366;">
+              <li class="nav-item">
+                <a href="inter-request.php" class="nav-link">
+                  <i class="fas fa-tint text-danger"></i>
+                  <p>Request</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="inter-approve.php" class="nav-link">
+                  <i class="fas fa-check text-danger"></i>
+                  <p>Approve</p>
+                </a>
+              </li>
+            </ul>
           </li>
           <li class="nav-item has-treeview menu-open">
             <a href="#" class="nav-link active bg-info" >

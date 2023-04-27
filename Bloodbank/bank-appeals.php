@@ -38,6 +38,61 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
       </div><!-- /.container-fluid -->
     </section>
+    <?php
+        if(isset($_POST['make-appeal'])) {
+        
+        // Get the updated values from the form
+        $bloodid = $_POST['bloodtype'];
+        $target = $_POST['target'];
+        $date = date("Y-m-d");
+        $bank_id = $bank_details['id'];
+        $status = 0;
+        
+      
+        // Update the patient record in the database
+        $sql = "INSERT INTO bank_appeals(bank_id, app_date, tgt_units, app_status, blood_id) VALUES(?, ?, ?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "isiii", $bank_id, $date, $target, $status, $bloodid);
+        if(!empty($bloodid) && !empty($target)){
+          mysqli_stmt_execute($stmt);
+          if(mysqli_stmt_error($stmt)) {
+            // Display the error message with the styled alert
+            echo '<div class="alert bg-danger">Error while inserting record, Try again later. ERROR ' . mysqli_error($conn).'</div>';
+        } else { 
+            // Display the success message with the styled alert
+            echo '<div class="alert bg-success">Blood Appeal successful submitted</div>';   
+        }
+        }else{
+          echo '<div class="alert bg-danger">Make Sure all fields are filled in</div>';
+            
+        }
+        // Close the statement
+        mysqli_stmt_close($stmt);
+      }
+    ?>
+    <?php
+      if(isset($_POST['end-request'])) {
+        // Get the updated values from the form
+        $appid = $_POST['appid'];
+        $status = 2;
+          // Update the record in the Blood Bank table
+          $stmt = mysqli_prepare($conn, "UPDATE bank_appeals SET app_status = ? WHERE id = ?");
+          mysqli_stmt_bind_param($stmt, "ii", $status, $appid);
+          mysqli_stmt_execute($stmt);
+          // Check if the update was successful
+          if(mysqli_stmt_affected_rows($stmt) > 0) {
+            echo '<div class="alert bg-success">Appeal Request succesfully Terminated</div>';  
+            echo '<meta http-equiv="refresh" content="2">';
+          } else {
+            echo "<div class='alert alert-danger alert-dismissible fade show btn-delete' role='alert'>Error Terminatiing  Appeal: " . mysqli_error($conn)."</div>";
+          }
+          
+          // Close the statement
+          mysqli_stmt_close($stmt);
+        
+      }
+      
+    ?>
 
     <!-- Main content -->
     <section class="content">
@@ -80,7 +135,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             // Loop through the results and create table rows
                             $count = 1;
                             while (mysqli_stmt_fetch($stmt)) {
-                              $percentage = ($collected/$target)*100;
+                              $percentage = round(($collected/$target)*100);
+                              $percent = round(($collected/$target)*100, 2);
+                              $percentage_diff = $percent - 100;
                         ?>
 
                         <tr>
@@ -90,23 +147,23 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <td><?php echo $target ?></td>
                         <td class="project_progress">
                             <div class="progress progress-sm">
-                                <div class="progress-bar bg-green" role="progressbar" aria-volumenow="<?php echo $percentage ?>" aria-volumemin="<?php echo $percentage ?>" aria-volumemax="100" style="width: 87%">
+                                <div class="progress-bar bg-green" role="progressbar" aria-volumenow="<?php echo $percentage ?>" aria-volumemin="<?php echo $percentage ?>" aria-volumemax="100" style="width: <?php echo ($percentage > 100)?" 100% ": $percentage."%" ?>">
                                 </div>
                             </div>
-                            <small>
-                            <?php echo $percentage ?>
-                            </small>
+                            <!-- <small> -->
+                            <?php echo ($percentage_diff > 0)? " 100% Complete <span class= 'text-success fas fa-plus'> $percentage_diff%</span>":"$percentage % Complete"; ?>
+                            <!-- </small> -->
                         </td>
                         <td>
-                        <?php  if ($app_status == 0) { ?>
+                        <?php  if ($app_status == 0 && $percentage < 100) { ?>
                             <a class="btn btn-danger btn-sm btn-end" href="#" href="#" data-toggle="modal" data-target="#modal-end" data-id='<?php echo $id; ?>'>
                                 <i class="fas fa-square">
                                 </i>
                                 End Request
                             </a> 
                         <?php } 
-                        else if($app_status == 1){
-                          echo "<span class='badge badge-success'>Completed</span>";
+                        else if($app_status == 1 || $percentage >= 100){
+                          echo "<span class='badge badge-success'>Target achieved Completed</span>";
                         }
                         else {
                           echo "<span class='badge badge-danger'>Expired/Suspended</span>";
@@ -122,28 +179,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             mysqli_stmt_close($stmt);
                             mysqli_close($conn);
                         ?>
-                                                <tr>
-                        <td>1</td>
-                        <td>19/11/2019</td>
-                        <td>B+</td>
-                        <td>80</td>
-                        <td class="project_progress">
-                            <div class="progress progress-sm">
-                                <div class="progress-bar bg-green" role="progressbar" aria-volumenow="87" aria-volumemin="0" aria-volumemax="100" style="width: 87%">
-                                </div>
-                            </div>
-                            <small>
-                                87% Complete
-                            </small>
-                        </td>
-                        <td>
-                            <a class="btn btn-danger btn-sm" href="#" href="#" data-toggle="modal" data-target="#modal-end">
-                                <i class="fas fa-square">
-                                </i>
-                                End Request
-                            </a>
-                        </td>
-                        </tr>
+                         
                         </tbody>
                         <tfoot>
                         <tr>
@@ -180,24 +216,36 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
         <div class="modal-body">
         <!-- <div class="card-body"> -->
-        <form class="">
+        <form method="post" name="make-appeal" role="make-appeal" action="<?php echo $_SERVER['PHP_SELF']; ?>">
             <div class="form-group">
                 <label for="">Blood Type</label>
-                <select name="" id="" class="form-control" >
+              <?php
+                    include '../dbconfig.php';
+                    // Retrieve the list of blood types from the database using a prepared statement
+                    $sql = "SELECT id, b_name FROM blood_type";
+                    $stmt = mysqli_prepare($conn, $sql);
+                    mysqli_stmt_execute($stmt);
+                    mysqli_stmt_bind_result($stmt, $id, $bname);
+
+                    // Fetch the results and store them in an array
+                    $blood_types = array();
+                    while (mysqli_stmt_fetch($stmt)) {
+                        $blood_types[] = array('id' => $id, 'b_name' => $bname);
+                    }
+
+                    // Close the statement
+                    mysqli_stmt_close($stmt);
+                ?>
+                <select name="bloodtype" id="bloodtype" class="form-control">
                     <option value="">~Select blood Group~</option>
-                    <option value="">A+</option>
-                    <option value="">B+</option>
-                    <option value="">AB+</option>
-                    <option value="">O+</option>
-                    <option value="">A-</option>
-                    <option value="">B-</option>
-                    <option value="">AB-</option>
-                    <option value="">O-</option>
+                    <?php foreach ($blood_types as $blood_type): ?>
+                    <option value="<?php echo $blood_type['id']; ?>"><?php echo $blood_type['b_name']; ?></option>
+                    <?php endforeach; ?>    
                 </select>
             </div>
             <div class="form-group">
                 <label for="">Units</label>
-                <input type="number" class="form-control" id="inputEmail3" placeholder="eg. 10 units">
+                <input type="number" class="form-control" id="target" name="target" placeholder="eg. 10 units">
             </div>
             <div class="row">
                 <div class="col-8">
@@ -205,7 +253,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </div>
                 <!-- /.col -->
                 <div class="col-4">
-                  <button type="submit" class="btn btn-success btn-block">Appeal</button>
+                  <button type="submit" name="make-appeal" class="btn btn-success btn-block">Appeal</button>
                 </div>
                 <!-- /.col -->
             </div>
@@ -229,14 +277,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
         <div class="modal-body">
         Terminating....
-        <h2 class="text-center">11/2/2019 - B+</h2>
+        <h2 class="text-center"><span id="endappeal" style="text-transform: uppercase;"></span></h2>
         </div>
-        <div class="modal-footer">
-            <!-- <div class="row"> -->
-                <button type="submit" class="btn btn-danger btn-block">End</button>
-            <!-- </div> -->
-
-        </div>
+        <form method="post" name="end-request" role="end-request" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <input type="hidden" name="appid" id="appid">
+          <div class="modal-footer">
+              <!-- <div class="row"> -->
+                  <button type="submit" name="end-request" class="btn btn-danger btn-block">End Appeal Request</button>
+          </div>
+        </form>
       </div>
       <!-- /.modal-content -->
     </div>
@@ -252,3 +301,27 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <!-- ./wrapper -->
 </body>
 </html>
+<script>
+    var endbtn = document.querySelectorAll('.btn-end');
+
+  endbtn.forEach(function(button) {
+  button.addEventListener('click', function() {
+    var app_id = button.getAttribute('data-id');
+    $.ajax({
+            url: "action.php",
+            type: "POST",
+            data: {
+                id: app_id,
+                action: "endRequest"
+            },
+            dataType: "json",
+            success: function(response) {
+                // Process the response here
+                $('#appid').val(response.id);
+                $('#endappeal').html(response.description);
+                
+            }
+        });
+  });
+});
+</script>

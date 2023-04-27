@@ -67,7 +67,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
             // Get the updated values from the form
             $offid = $_POST['assOffId'];
             $bank_id = $_POST['assBank'];
-            $status = 2;
+            $status = 1;
+            $current_status = 0;
 
                 // Check if the officer is already assigned to a bank
                 $stmt = mysqli_prepare($conn, "SELECT id FROM blood_bank WHERE officer_id = ?");
@@ -79,12 +80,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     mysqli_stmt_bind_result($stmt, $current_bank_id);
                     mysqli_stmt_fetch($stmt);
                     // Update the record in the Blood Bank table to null
-                    $stmt2 = mysqli_prepare($conn, "UPDATE blood_bank SET officer_id = NULL WHERE officer_id = ? AND id = ?");
-                    mysqli_stmt_bind_param($stmt2, "ii", $offid, $current_bank_id);
+                    $stmt2 = mysqli_prepare($conn, "UPDATE blood_bank SET officer_id = NULL, bank_status = ? WHERE officer_id = ? AND id = ?");
+                    mysqli_stmt_bind_param($stmt2, "iii", $current_status, $offid, $current_bank_id);
                     mysqli_stmt_execute($stmt2);
                     if(mysqli_stmt_affected_rows($stmt2) > 0){
-                      $stmt3 = mysqli_prepare($conn, "UPDATE blood_bank SET officer_id = ? WHERE id = ?");
-                      mysqli_stmt_bind_param($stmt3, "ii", $offid, $bank_id);
+                      $stmt3 = mysqli_prepare($conn, "UPDATE blood_bank SET officer_id = ?, bank_status = ? WHERE id = ?");
+                      mysqli_stmt_bind_param($stmt3, "iii", $offid, $status, $bank_id);
                       mysqli_stmt_execute($stmt3);
 
                       if(mysqli_stmt_affected_rows($stmt3) > 0){
@@ -100,8 +101,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
                 
               }else{
-                $stmt4 = mysqli_prepare($conn, "UPDATE blood_bank SET officer_id = ? WHERE id = ?");
-                mysqli_stmt_bind_param($stmt4, "ii", $offid, $bank_id);
+                $stmt4 = mysqli_prepare($conn, "UPDATE blood_bank SET officer_id = ?, bank_status = ? WHERE id = ?");
+                mysqli_stmt_bind_param($stmt4, "iii", $offid, $bank_status, $bank_id);
                 mysqli_stmt_execute($stmt4);
                   // Check if the update was successful
                   if(mysqli_stmt_affected_rows($stmt4) > 0) {
