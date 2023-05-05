@@ -158,7 +158,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <div class="card-body">
                   <div class="tab-content">
                     <div class="active tab-pane" id="activity">
-                    <div class="card">   
+                    <div class="card">
+                          <div class="card-header">
+                            <div class="clearfix">
+                              <a class="btn btn-primary float-right open-link" 
+                              href = "report.php?action=donor-donations" 
+                              title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                            </div>
+                          </div>   
                           <div class="card-body">
                           <table id="example1" class="table table-bordered table-striped">
                               <thead>
@@ -229,7 +236,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <!-- /.tab-pane -->
                   <div class="tab-pane" id="timeline">
                     <!-- The timeline -->
-                    <div class="card">   
+                    <div class="card"> 
+                      <div class="card-header">
+                            <div class="clearfix">
+                              <a class="btn btn-primary float-right open-link" 
+                              href = "report.php?action=patient-appeals" 
+                              title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                            </div>
+                        </div>   
                         <div class="card-body">
                           <table id="example2" class="table table-bordered table-striped">
                             <thead>
@@ -302,7 +316,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <!-- /.tab-pane -->
   
                     <div class="tab-pane" id="settings">
-                    <div class="card">   
+                    <div class="card"> 
+                      <div class="card-header">
+                            <div class="clearfix">
+                              <a class="btn btn-primary float-right open-link" 
+                              href = "report.php?action=inter-transfers" 
+                              title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                            </div>
+                        </div>  
                           <div class="card-body">
                           <table id="example3" class="table table-bordered table-striped">
                               <thead>

@@ -128,8 +128,11 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <div class="clearfix">
-                                <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-addbank" title="Search"><i class="fas fa-plus"></i> Add Bank</button>
+                            <div class="clearfix float-right">
+                                <button type="button" class="btn btn-info " data-toggle="modal" data-target="#modal-addbank" title="Search"><i class="fas fa-plus"></i> Add Bank</button>
+                                <a class="btn btn-primary  open-link" 
+                                  href = "report.php?action=banks" 
+                                  title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
                             </div>
                         </div>
                     <div class="card-body">

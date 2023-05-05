@@ -98,10 +98,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <div class="row">
                 <div class="col-12">
                     <div class="card"> 
-                      <div class="card-header">
-                        <div class="clearfix">
-                            <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-addofficer" title="Search"><i class="fas fa-plus"></i> Add Administrator</button>
-                        </div>
+                    <div class="card-header">
+                      <div class="clearfix">
+                        <a class="btn btn-primary float-right open-link" 
+                        href = "report.php?action=admins" 
+                        title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                      </div>
                     </div>  
                     <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">
@@ -175,76 +177,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
-  <div class="modal fade" id="modal-addofficer">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Add Administrator</h4>
-          <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form action="../../index.html" method="post">
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" name="fname" placeholder="First name">
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-user"></span>
-                </div>
-              </div>
-            </div>
 
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" name="lname" placeholder="Last Name">
-                <div class="input-group-append">
-                  <div class="input-group-text">
-                    <span class="fas fa-user"></span>
-                  </div>
-                </div>
-            </div>
-            <div class="input-group mb-3">
-              <input type="email" class="form-control" name="mail" placeholder="Email">
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-envelope"></span>
-                </div>
-              </div>
-            </div>
-            <div class="input-group mb-3">
-                <input type="tel" class="form-control" name="phone" placeholder="Phone">
-                <div class="input-group-append">
-                  <div class="input-group-text">
-                    <span class="fas fa-phone"></span>
-                  </div>
-                </div>
-            </div>
-            <div class="input-group mb-3">
-              <input type="password" class="form-control" name="psword" placeholder="Password">
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-lock"></span>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-8">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-              </div>
-              <!-- /.col -->
-              <div class="col-4">
-                <button type="submit" name="add admin" class="btn btn-success btn-block">Add</button>
-              </div>
-              <!-- /.col -->
-            </div>
-          </form>
-        </div>
-      </div>
-      <!-- /.modal-content -->
-    </div>
-    <!-- /.modal-dialog -->
-  </div>
-  <!-- /.modal -->
 
   <div class="modal fade" id="modal-edit">
     <div class="modal-dialog">

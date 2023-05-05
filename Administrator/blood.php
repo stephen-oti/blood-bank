@@ -57,7 +57,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                       <canvas id="graphCanvas" style="width:100%;max-width:600px"></canvas>
                     </div>      
                   </div>
-                <div class="card">   
+                <div class="card">
+                  <div class="card-header">
+                      <div class="clearfix">
+                        <a class="btn btn-primary float-right open-link" 
+                        href = "report.php?action=total-blood" 
+                        title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                      </div>
+                    </div>    
                     <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">
                         <thead>
@@ -87,7 +94,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                             COALESCE(AB_neg_total, 0) AS AB_neg_total,
                                             COALESCE(O_pos_total, 0) AS O_pos_total,
                                             COALESCE(O_neg_total, 0) AS O_neg_total
-                                    FROM blood_bank bb
+                                    FROM blood_bank bb 
                                     LEFT JOIN (
                                       SELECT pouch.bank_id,
                                               SUM(CASE WHEN blood_type.`id` = 1 THEN pouch.units ELSE 0 END) AS A_pos_total,
@@ -100,9 +107,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                               SUM(CASE WHEN blood_type.`id` = 8 THEN pouch.units ELSE 0 END) AS O_neg_total
                                       FROM pouch
                                       LEFT JOIN blood_type ON pouch.blood_id = blood_type.id
-                                      WHERE DATEDIFF(NOW(), fill_date) <= 35 AND pouch_status = 1
+                                      WHERE DATEDIFF(NOW(), fill_date) <= 35 AND pouch_status = 1 
                                       GROUP BY pouch.bank_id
-                                    ) blood_totals ON bb.id = blood_totals.bank_id";
+                                    ) blood_totals ON bb.id = blood_totals.bank_id WHERE bb.bank_status != 2";
                             $stmt = mysqli_prepare($conn, $sql);
 
                             // Execute the statement
@@ -188,7 +195,7 @@ $sql = "SELECT
         FROM pouch
         LEFT OUTER JOIN blood_bank ON blood_bank.id = pouch.bank_id
         JOIN blood_type ON pouch.blood_id = blood_type.id
-        WHERE DATEDIFF(NOW(), fill_date) <= 35 AND pouch_status = 1";
+        WHERE DATEDIFF(NOW(), fill_date) <= 35 AND pouch_status = 1 AND blood_bank.`bank_status` != 2 ";
 
 // Bind the parameter and execute the statement
 $stmt = mysqli_prepare($conn, $sql); // Assuming $bank_id is the value you want to bind

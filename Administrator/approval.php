@@ -131,6 +131,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <div class="row">
                 <div class="col-12">
                     <div class="card"> 
+                    <div class="card-header">
+                      <div class="clearfix">
+                        <a class="btn btn-primary float-right open-link" 
+                        href = "report.php?action=request-approval" 
+                        title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                      </div>
+                    </div> 
                     <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">
                         <thead>
@@ -226,7 +233,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <b>Request Date</b><a class="float-right" id="reqdate"></a>
             </li>
             <li class="list-group-item">
-              <b>Qualification Document</b><span id="reqdoc"></span>
+              <b>Qualification Document</b><a href='#' id='reqdoc' data-toggle='modal' data-target='#modal-xl' class='float-right text-primary open-link' ><i class='fas fa-external-link-alt'></i><span id='req_name'></span>'s CV.pdf</a>
             </li>
           </ul>
         </div>
@@ -337,7 +344,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
             success: function(response) {
                 // Process the response here
                 $('#reqdate').html(response.Date);
-                $('#reqdoc').html( "<a target='_blank' href='../RegistrationReq/uploads/"+response.cv+"' class='float-right text-primary' ><i class='fas fa-external-link-alt'></i>"+response.fullName+"'s CV.pdf</a>");
+                $('#req_name').html(response.fullName);
+                req_link = "../RegistrationReq/uploads/"+response.cv;
+                const reqTag = document.querySelector("#reqdoc");
+                reqTag.href = req_link;
+                // $('#reqdoc').html( "");
                 
             }
         });

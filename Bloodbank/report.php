@@ -3,16 +3,13 @@
 // Include the FPDF library
 require('../FPDF/fpdf.php');
 include '../dbconfig.php';
-
+session_start();
 // Create a new PDF document
 $pdf = new FPDF();
 
-if(isset($_GET['action'])){
+if(isset($_GET['action']) && isset($_SESSION['bank_id'])){
     // Get the donor ID from the AJAX request
-    $bank_id = $_GET['bank_id'];
-    
-    $bankname = $_GET['bank_name'];
-    
+    $bank_id = $_SESSION['bank_id'];
     $today = new DateTime();
     // Retrieve the patient details from the database using prepared statements
     $sql = "SELECT * FROM blood_bank WHERE id = ?";

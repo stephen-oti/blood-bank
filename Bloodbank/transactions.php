@@ -59,7 +59,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <div class="card-header">
                             <div class="clearfix">
                               <a class="btn btn-primary float-right open-link" 
-                              href = "report.php?bank_id=<?php echo $bank_details['id']?>&bank_name=<?php echo $bank_details['bank_name']?>&action=bank-donations" 
+                              href = "report.php?action=bank-donations" 
                               title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
                             </div>
                           </div>  
@@ -133,7 +133,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                           <div class="card-header">
                             <div class="clearfix">
                               <a class="btn btn-primary float-right open-link" 
-                              href = "report.php?bank_id=<?php echo $bank_details['id']?>&bank_name=<?php echo $bank_details['bank_name']?>&action=patient-transfusions" 
+                              href = "report.php?action=patient-transfusions" 
                               title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
                             </div>
                           </div>  
@@ -209,7 +209,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                           <div class="card-header">
                             <div class="clearfix">
                               <a class="btn btn-primary float-right open-link" 
-                              href = "report.php?bank_id=<?php echo $bank_details['id']?>&bank_name=<?php echo $bank_details['bank_name']?>&action=bank-transfers" 
+                              href = "report.php?action=bank-transfers" 
                               title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
                             </div>
                           </div> 

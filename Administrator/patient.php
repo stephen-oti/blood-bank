@@ -105,6 +105,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <div class="col-12">
                     <div class="card"> 
                     <div class="card-body">
+                    <div class="card-header">
+                      <div class="clearfix">
+                        <a class="btn btn-primary float-right open-link" 
+                        href = "report.php?action=patients" 
+                        title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                      </div>
+                    </div>
                     <table id="example1" class="table table-bordered table-striped">
                         <thead>
                         <tr>
@@ -166,9 +173,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
                           <tr>
                           <th>#</th>
                           <th>Name</th>
+                          <th>Age</th>
                           <th>Address</th>
                           <th>Contact</th>
-                          <th>Total Donation</th>
+                          <th>Blood Type</th>
                           <th>Action</th>
                           </tr>
                         </tfoot>

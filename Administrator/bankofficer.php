@@ -122,11 +122,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <div class="row">
                 <div class="col-12">
                     <div class="card"> 
-                      <!-- <div class="card-header">
-                        <div class="clearfix">
-                            <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-addofficer" title="Search"><i class="fas fa-plus"></i> Add officer</button>
-                        </div>
-                    </div>   -->
+                    <div class="card-header">
+                      <div class="clearfix">
+                        <a class="btn btn-primary float-right open-link" 
+                        href = "report.php?action=officers" 
+                        title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                      </div>
+                    </div> 
                     <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">
                         <thead>
@@ -160,7 +162,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <td><?php echo $count; ?></td>
                         <td><?php echo $fullname; ?></td>
                         <td><b class="text-muted">mail: </b><?php echo $email; ?><br><b class="text-muted">contact: </b><?php echo $phone; ?></td>
-                        <td><?php echo ($bid == Null)? "Not assigned" : "$bid - $bankname"; ?></td>
+                        <td><?php echo ($bid == Null)? "Not assigned" : "$bankname"; ?></td>
                         <td>
                           <a class="btn btn-primary btn-sm btn-edit" href="#" data-toggle="modal" data-target="#modal-edit" data-id='<?php echo $oid; ?>'>
                             <i class="fas fa-edit"></i>

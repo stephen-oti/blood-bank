@@ -103,7 +103,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
-                    <div class="card">   
+                    <div class="card">
+                    <div class="card-header">
+                      <div class="clearfix">
+                        <a class="btn btn-primary float-right open-link" 
+                        href = "report.php?action=donors" 
+                        title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                      </div>
+                    </div>   
                     <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">
                         <thead>
@@ -165,9 +172,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <tr>
                         <th>#</th>
                         <th>Name</th>
+                        <th>Age</th>
                         <th>Address</th>
                         <th>Contact</th>
-                        <th>Total Donation</th>
+                        <th>Blood Type</th>
                         <th>Action</th>
                         </tr>
                         </tfoot>
