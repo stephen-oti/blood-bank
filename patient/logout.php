@@ -1,6 +1,12 @@
+
 <?php
 session_start();
-session_destroy();
-header('Location: login.php');
+
+// Unset session variable based on module
+if (isset($_SESSION['patient_id'])) {
+    unset($_SESSION['patient_id']);
+    header('Location: login.php');
+} 
+
 exit();
 ?>

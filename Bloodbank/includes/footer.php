@@ -99,6 +99,29 @@
   </div>
   <!-- /.modal -->
 
+  <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Reports</span></h4>
+              <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+           <span id="myFrame"></span>
+            </div>
+            <!-- <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div> -->
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
   <!-- /.control-sidebar -->
 
   <!-- Main Footer -->
@@ -164,4 +187,13 @@
         "responsive": true,
       });
     });
+  </script>
+  <script>
+  var linkbutton = document.querySelectorAll('.open-link');
+    linkbutton.forEach(function(button) {
+    button.addEventListener('click', function() {
+      var url = button.getAttribute('href');
+      $('#myFrame').html("<iframe src='"+ url +"' style='width: 100%; height: 550px;'></iframe>"); 
+    });
+  });
   </script>

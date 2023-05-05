@@ -116,7 +116,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   <div class="info-box-content">
                     <span class="info-box-text">Approved</span>
                     <span class="info-box-number"><?php
-                      $sql_approved = "SELECT  * FROM patient_appeal WHERE patient_id = $patient_id AND app_status = 1 OR app_status = 4";
+                      $sql_approved = "SELECT  * FROM patient_appeal WHERE patient_id = $patient_id AND (app_status = 1 OR app_status = 4)";
                       $query_approved = mysqli_query($conn,$sql_approved);
                       echo mysqli_num_rows($query_approved);
                       ?></span>
@@ -209,21 +209,25 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         WHERE DATEDIFF(NOW(), pouch.fill_date) <= 35 AND pouch.pouch_status = 1 AND blood_bank.`bank_status` = 1";
 
                         // add conditions based on patient's blood group and rhesus factor
-                        if ($patient_blood_group === "AB") {
+                        if ($user_blood == 5) {
                           // AB can receive from any blood group as long as the rhesus factor                       
-                          $sql .= " AND blood_type.`rhesus` = '$patient_rh_factor'";
+                          $sql .= " AND (pouch.blood_id = 1 OR pouch.blood_id = 3  OR pouch.blood_id = 5  OR pouch.blood_id = 7)";
+                          
+                        }else if ($user_blood == 6) {
+                          // AB can receive from any blood group as long as the rhesus factor                       
+                          $sql .= " AND (pouch.blood_id = 2 OR pouch.blood_id = 4  OR pouch.blood_id = 6  OR pouch.blood_id = 8)";
                           
                         }else {
                           // other blood groups can receive from the same blood group and O, as long as the rhesus factor is compatible
                           if ($patient_rh_factor === "positive") {
-                          $sql .= " AND (blood_type.`b_group` = '$patient_blood_group' AND blood_type.`rhesus` = 'positive') OR (blood_type.`b_group` = 'O' AND blood_type.`rhesus` = 'positive')";
+                          $sql .= " AND (pouch.blood_id = $user_blood OR pouch.blood_id = 7)";
                           } else {
-                          $sql .= " AND (blood_type.`b_group` = '$patient_blood_group' AND blood_type.`rhesus` = 'negative') OR (blood_type.`b_group` = 'O' AND blood_type.`rhesus` = 'negative')";   
+                          $sql .= " AND (pouch.blood_id = $user_blood OR pouch.blood_id = 8)";   
                           }
                         }
 
                         // order the results by distance
-                        $sql .= " ORDER BY distance ASC";
+                        $sql .= " GROUP BY pouch.`blood_id`, pouch.`bank_id` ORDER BY distance ASC";
                         // Prepare a select statement
                         $stmt = mysqli_prepare($conn, $sql);
 

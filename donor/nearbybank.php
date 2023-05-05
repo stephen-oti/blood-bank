@@ -92,9 +92,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <?php if($donor_details['donation_days'] < 0){ ?>
                 <div class="callout callout-warning">
                 <h5><i class="fas fa-history"></i> Donation Time: <span class="badge badge-danger"><?php echo abs($donor_details['donation_days']); ?> Days  to go</span></h5>
-                  You can only donate once after every 35 days, Your last Donation was <b><?php echo  $donor_details['d_next']; ?></b> you've got <b><?php echo abs($donor_details['donation_days']); ?> </b>more days to go
+                  You can only donate once after every 56 days, Your last Donation was <b><?php echo  $donor_details['d_next']; ?></b> you've got <b><?php echo abs($donor_details['donation_days']); ?> </b>more days to go
               </div>
               <?php } ?>
+
+              <?php if($donor_details['d_lat'] == null || $donor_details['d_lon'] == null){ ?>
+              <div class="callout callout-warning">
+                <h5><i class="fas fa-clock"></i> Location Update</h5>
+                    <?php echo "You've not updated your Location details";
+                    // echo " <button type='button' class='btn btn-danger pulse' data-toggle='modal' data-target='#modal-location' onclick='updateLocation()'><i class='fas fa-map-marker-alt'></i> Update Location</button>"?>
+              </div>
+          <?php } ?>
 
               <!-- /.card -->
               <div class="card">
@@ -117,7 +125,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <tbody>
                     <?php
                     $donor_status = $donor_details['d_status'];
-                    if($donor_status != null){
+                    if(($donor_status == 1) && !($donor_details['d_lat'] == null || $donor_details['d_lon'] == null)){
                       $donor_lat = $donor_details['d_lat'];
                       $donor_lon = $donor_details['d_lon'];
                         $sql = "SELECT id, bank_name, email, phone, address, county, lat, lon,
@@ -164,6 +172,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         // Close the statement and database connection
                         mysqli_stmt_close($stmt);
                         mysqli_close($conn);
+                      }else{
+                        echo "No data to Show, Update your Details to see Nearby Banks";
                       }
                     ?>
                     </tbody>

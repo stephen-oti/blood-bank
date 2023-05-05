@@ -56,7 +56,6 @@
           
           // Set session variables
           $_SESSION['admin_id'] = $id;
-          $_SESSION['role'] = $role;
 
           // Redirect to the user's profile page
           echo '<div class="alert bg-success">Login Successful</div>';

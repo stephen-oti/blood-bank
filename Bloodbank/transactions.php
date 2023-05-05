@@ -55,7 +55,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <div class="card-body">
                   <div class="tab-content">
                     <div class="active tab-pane" id="activity">
-                    <div class="card">   
+                    <div class="card"> 
+                        <div class="card-header">
+                            <div class="clearfix">
+                              <a class="btn btn-primary float-right open-link" 
+                              href = "report.php?bank_id=<?php echo $bank_details['id']?>&bank_name=<?php echo $bank_details['bank_name']?>&action=bank-donations" 
+                              title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                            </div>
+                          </div>  
                           <div class="card-body">
                           <table id="example1" class="table table-bordered table-striped">
                               <thead>
@@ -122,7 +129,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <!-- /.tab-pane -->
                   <div class="tab-pane" id="timeline">
                     <!-- The timeline -->
-                    <div class="card">   
+                    <div class="card">  
+                          <div class="card-header">
+                            <div class="clearfix">
+                              <a class="btn btn-primary float-right open-link" 
+                              href = "report.php?bank_id=<?php echo $bank_details['id']?>&bank_name=<?php echo $bank_details['bank_name']?>&action=patient-transfusions" 
+                              title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                            </div>
+                          </div>  
                         <div class="card-body">
                           <table id="example2" class="table table-bordered table-striped">
                             <thead>
@@ -191,7 +205,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <!-- /.tab-pane -->
   
                     <div class="tab-pane" id="settings">
-                    <div class="card">   
+                    <div class="card">  
+                          <div class="card-header">
+                            <div class="clearfix">
+                              <a class="btn btn-primary float-right open-link" 
+                              href = "report.php?bank_id=<?php echo $bank_details['id']?>&bank_name=<?php echo $bank_details['bank_name']?>&action=bank-transfers" 
+                              title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                            </div>
+                          </div> 
                           <div class="card-body">
                           <table id="example3" class="table table-bordered table-striped">
                               <thead>
@@ -209,7 +230,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
                               <?php
                                     $bank_id = $bank_details['id'];
                                     $sql = "SELECT transfer.trans_date, transfer.appr_bank, transfer.req_bank, transfer.pouch_id ,pouch.units, inter_bank.quantity, blood_type.b_name,
-                                    blood_bank.bank_name, blood_bank.email, blood_bank.phone
+                                    (SELECT bank_name FROM blood_bank WHERE id = transfer.appr_bank),
+                                    (SELECT email FROM blood_bank WHERE id = transfer.appr_bank),
+                                    (SELECT phone FROM blood_bank WHERE id = transfer.appr_bank),
+                                    blood_bank.bank_name AS req_bank_name, blood_bank.email AS req_bank_mail, blood_bank.phone AS req_bank_phone
                                     FROM transfer
                                     LEFT OUTER JOIN inter_bank ON inter_bank.id = transfer.`inter_bank_id`
                                     JOIN pouch ON pouch.id = transfer.`pouch_id`
@@ -224,7 +248,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                     mysqli_stmt_execute($stmt);
             
                                     // Bind the result variables
-                                    mysqli_stmt_bind_result($stmt, $trans_date, $appr_bank, $req_bank, $pouch_id, $units, $requested_qty, $blood_name, $bank_name,$bank_mail, $bank_phone);
+                                    mysqli_stmt_bind_result($stmt, $trans_date, $appr_bank, $req_bank, $pouch_id, $units, $requested_qty, $blood_name,$appr_bank_name, $appr_bank_mail, $appr_bank_phone, $bank_name,$bank_mail, $bank_phone);
             
                                     // Loop through the results and create table rows
                                     $count = 1;
@@ -242,9 +266,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                   }
                                 ?>
                               </td>
-                              <td><?php echo $bank_name; ?></td>
+                              <td><?php echo ($req_bank == $bank_id)?"$appr_bank_name":"$bank_name"; ?></td>
                               <!-- <td>P.O Box 333-40100, Kisumu</td> -->
-                              <td><b class="text-muted">mail: </b><?php echo $bank_mail; ?><br><b class="text-muted">contact: </b><?php echo $bank_phone; ?></td>
+                              <td><b class="text-muted">mail: </b><?php echo ($req_bank == $bank_id)?"$appr_bank_mail":"$bank_mail"; ?><br><b class="text-muted">contact: </b><?php echo ($req_bank == $bank_id)?"$appr_bank_phone":"$bank_phone"; ?></td>
                               <td><span class="badge badge-success" style="font-size: 16px;"><?php echo $units; ?></span> - <span class="badge badge-danger" style="font-size: 16px;"><?php echo $requested_qty; ?></span></td>
                               <td><span class="badge badge-danger" style="font-size: 16px;"><?php echo $blood_name; ?></span><br><b class="text-muted">Pouch: </b><?php echo $pouch_id; ?></td>
                               </tr>

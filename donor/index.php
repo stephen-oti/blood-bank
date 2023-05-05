@@ -17,7 +17,23 @@
   <?php include 'includes/sidebar.php'?>
   <!-- /.Main Sidebar Container -->
   
+<style>
+  .pulse {
+  animation: pulse 2s infinite;
+}
 
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(255, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+  }
+}
+</style>
     <?php
 
     // Retrieve the patient details from the database using prepared statements
@@ -41,8 +57,6 @@
     $donor_id = $_SESSION['donor_id'];
     // Get the updated values from the form
     $blood_group = intval($_POST['blood_group']);
-    $latitude = $_POST['lat'];
-    $longitude = $_POST['long'];
     $d_status = 1;
 
     // Check if a medical condition was selected
@@ -69,13 +83,13 @@
         move_uploaded_file($_FILES['customFile']['tmp_name'], $target_file);
     
         // Update the patient record in the database
-        $sql = "UPDATE donor SET blood_id = ?, d_cond = ?, d_lat = ?, d_lon = ?, d_report = ? ,d_status = ? WHERE id = ?";
+        $sql = "UPDATE donor SET blood_id = ?, d_cond = ?, d_report = ? ,d_status = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "isddsii", $blood_group, $medical_condition, $latitude, $longitude, $file_name,$d_status, $donor_id);
+        mysqli_stmt_bind_param($stmt, "issii", $blood_group, $medical_condition, $file_name, $d_status, $donor_id);
   }else{
-    $sql = "UPDATE donor SET blood_id = ?, d_cond = ?, d_lat = ?, d_lon = ?, d_status = ? WHERE id = ?";
+    $sql = "UPDATE donor SET blood_id = ?, d_cond = ?, d_status = ? WHERE id = ?";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "isddii", $blood_group, $medical_condition, $latitude, $longitude, $d_status, $donor_id);
+    mysqli_stmt_bind_param($stmt, "isii", $blood_group, $medical_condition, $d_status, $donor_id);
   }
     mysqli_stmt_execute($stmt);
 
@@ -180,7 +194,37 @@
         </div>
       </div><!-- /.container-fluid -->
     </section>
+    <?php
+      if(isset($_POST['update-location'])) {
+        $donor_id = $_SESSION['donor_id'];
+        // Get the updated values from the form
+        $donor_lat = $_POST['don_lat'];
+        $donor_lon = $_POST['don_lon'];
+        
+      if(!($donor_lat == null) && !($donor_lon == null)){
+    
+        // Update the patient record in the database
+        $sql = "UPDATE donor SET d_lat = ?, d_lon = ? WHERE id = ?";
+        $stmnt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmnt, "ddi", $donor_lat, $donor_lon, $donor_id);
+        mysqli_stmt_execute($stmnt);
+      
+        // Check if the update was successful
+        if(mysqli_stmt_affected_rows($stmnt) > 0) {
+          echo '<div class="alert alert-success alert-dismissible fade show" role="alert">Location Updated Successfully.</div>';
+          echo '<meta http-equiv="refresh" content="2">';
+        } else {
+          echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">Update failed. Please try again.</div>';
+        }
+          // Close the statement
+          mysqli_stmt_close($stmnt);
+      }else{
+        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">Ensure you have a stable internet connection or Geo Location is enabled on browser</div>';
+      }
 
+
+      }
+    ?>
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
@@ -213,6 +257,7 @@
                     echo "Pending first Donation";
                   } else {
                     if($donor_details['donation_days'] < 0){
+                      $days_left = abs($donor_details['donation_days']);
                       echo "$days_left Days Recommended";
                     }else if($donor_details['donation_days'] >= 0){
                       echo "You can donate";
@@ -262,6 +307,13 @@
                     <i class='fas fa-edit'></i> Update/Fill Questionnaire
                   </button>"?>
                     
+              </div>
+          <?php } ?>
+          <?php if($donor_details['d_lat'] == null || $donor_details['d_lon'] == null){ ?>
+              <div class="callout callout-warning">
+                <h5><i class="fas fa-clock"></i> Location Update</h5>
+                    <?php echo "You've not updated your Location details";
+                    echo " <button type='button' class='btn btn-danger pulse' data-toggle='modal' data-target='#modal-location' onclick='updateLocation()'><i class='fas fa-map-marker-alt'></i> Update Location</button>"?>
               </div>
           <?php } ?>
 
@@ -335,9 +387,19 @@
                   P.O. Box. <?php echo $donor_details['address'];?><br>
                   <?php echo $donor_details['county'];?>, KENYA<br>
                 </address>
+                
+                <div class="row">
+                <div class="col-8">
                 <button type="button" class="btn btn-info btn-block" data-toggle="modal" data-target="#modal-qedit">
                   <i class="fas fa-edit"></i> Update/Fill Questionnaire
                 </button>
+                </div>
+                <!-- /.col -->
+                <div class="col-4">
+                  <button type="button" class="btn btn-danger btn-block pulse" data-toggle="modal" data-target="#modal-location" onclick="updateLocation()"><i class="fas fa-map-marker-alt"></i> Update Location</button>
+                </div>
+                <!-- /.col -->
+              </div>
             </div>
             <!-- /.card-body -->
           </div>
@@ -535,27 +597,6 @@
                   <label class="custom-file-label" for="customFile"> <?php echo $donor_details['d_report'] ? $donor_details['d_report'] : '~Upload PDF medical report~' ?></label>
                 </div>
               </div>
-              <label for="location">Location Details <span style="font-size: small; color:red; font-style: italic;">(Get details using Google Maps and paste here)</span></label>
-              <span class="response" data-input="lat"></span>
-              <div class="input-group mb-3">
-                  <input type="text" class="form-control" name="lat" id="lat" placeholder="Latitude" onkeyup="validateInput('lat')" value="<?php echo $donor_details['d_lat'] ? $donor_details['d_lat'] : '' ?>" required>
-                  <div class="input-group-append">
-                    <div class="input-group-text">
-                      <span class="fas fa-globe"> Latitude</span>
-                    </div>
-                  </div>
-              </div>
-              <span class="response" data-input="long"></span>
-              <div class="input-group mb-3">
-                <input type="text" class="form-control" name="long" id="long" placeholder="Longitude" onkeyup="validateInput('long')" value="<?php echo $donor_details['d_lon'] ? $donor_details['d_lon'] : '' ?>" required>
-                <div class="input-group-append">
-                  <div class="input-group-text">
-                    <span class="fas fa-globe"> Longitude</span>
-                  </div>
-                </div>
-              </div>
-
-
               <div class="row">
                 <div class="col-8">
                   
@@ -696,6 +737,34 @@
   </div>
   <!-- /.modal -->
 
+  <div class="modal fade" id="modal-location">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Confirm Updating location</h4>
+          <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+        Updating user location....
+        <h2 class="text-center">UPDATING LOCATION USING GEOLOCATION</h2>
+        </div>
+        <form method="post" name="update-location" role="update-location" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <input type="hidden" name="don_lat" id="don_lat" placeholder="Latitude">
+        <input type="hidden" name="don_lon" id="don_lon" placeholder="Longitude">
+          <div class="modal-footer">
+              <!-- <div class="row"> -->
+                <button type="submit" id="update-location" name="update-location" class="btn btn-danger btn-block">Update Location</button>
+          </div>
+        </form>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
   <!-- Footer -->
   <?php include 'includes/footer.php'; ?>
   <!-- /.Footer -->
@@ -787,5 +856,26 @@ fileInput.addEventListener('click', function() {
 });
 </script>
 <?php } ?>
+<script>
+function updateLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var lat = position.coords.latitude;
+      var lon = position.coords.longitude;
+      
+      document.getElementById("don_lat").value = lat;
+      document.getElementById("don_lon").value = lon;
+      console.log("Longitude"+ lat);
+      console.log("Latitude"+ lon);
+      
+    });
+  } else {
+    // $('#update-location').prop('disabled',true );
+    alert("Geolocation is not supported by this browser.");
+   
+  }
+}
+
+</script>
 </body>
 </html>

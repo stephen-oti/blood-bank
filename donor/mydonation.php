@@ -45,6 +45,11 @@
               <!-- /.card -->
               <div class="card">
                 <!-- /.card-header -->
+                <div class="card-header">
+                  <div class="clearfix">
+                    <button type="submit" class="btn btn-primary float-right" title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</button>
+                  </div>
+                </div>
                 <div class="card-body">
                   <table id="example1" class="table table-bordered table-striped">
                     <thead>
@@ -145,6 +150,29 @@
     <!-- /.modal-dialog -->
   </div>
   <!-- /.modal -->
+
+  <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">My Donation Reports</span></h4>
+              <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+            <?php $url = "report.php?donor_id=". $donor_details['id']."&donor_name=".$donor_details['fname']." ".$donor_details['lname']."&action=donor-donations"; ?>
+            <iframe src="<?php echo $url; ?>" style='width: 100%; height: 600px';></iframe>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
 
 
   <!-- Footer -->

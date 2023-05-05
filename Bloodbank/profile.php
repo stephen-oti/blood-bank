@@ -21,6 +21,24 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <?php include 'includes/sidebar.php'?>
   <!-- /.Main Sidebar Container -->
 
+  <style>
+  .pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(255, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+  }
+}
+</style>
+
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -48,12 +66,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
         $phone = $_POST['bankphone'];
         $address = $_POST['bankaddress'];
         $county = strtoupper(trim($_POST['bankcounty']));
-        $lat = $_POST['banklat'];
-        $lon = $_POST['banklon'];
         $bankid = $_POST['bankid'];
           // Update the record in the Blood bank table
-          $stmt = mysqli_prepare($conn, "UPDATE blood_bank SET bank_name = ?, email = ?, phone = ?, address = ?, county = ?, lat= ?, lon = ? WHERE id = ?");
-          mysqli_stmt_bind_param($stmt, "sssssddi", $bankname, $mail, $phone, $address, $county, $lat, $lon, $bankid);
+          $stmt = mysqli_prepare($conn, "UPDATE blood_bank SET bank_name = ?, email = ?, phone = ?, address = ?, county = ? WHERE id = ?");
+          mysqli_stmt_bind_param($stmt, "sssssi", $bankname, $mail, $phone, $address, $county, $bankid);
           mysqli_stmt_execute($stmt);
           // Check if the update was successful
           if(mysqli_stmt_affected_rows($stmt) > 0) {
@@ -68,6 +84,37 @@ scratch. This page gets rid of all links and provides the needed markup only.
         
       }
 ?>
+    <?php
+      if(isset($_POST['update-location'])) {
+        $bank_id = $bank_details['id'];
+        // Get the updated values from the form
+        $bank_lat = $_POST['bank_lat'];
+        $bank_lon = $_POST['bank_lon'];
+        
+      if(!($bank_lat == null) && !($bank_lon == null)){
+    
+        // Update the patient record in the database
+        $sql = "UPDATE blood_bank SET lat = ?, lon = ? WHERE id = ?";
+        $stmnt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmnt, "ddi", $bank_lat, $bank_lon, $bank_id);
+        mysqli_stmt_execute($stmnt);
+      
+        // Check if the update was successful
+        if(mysqli_stmt_affected_rows($stmnt) > 0) {
+          echo '<div class="alert alert-success alert-dismissible fade show" role="alert">Location Updated Successfully.</div>';
+          echo '<meta http-equiv="refresh" content="2">';
+        } else {
+          echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">Update failed. Please try again.</div>';
+        }
+          // Close the statement
+          mysqli_stmt_close($stmnt);
+      }else{
+        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">Ensure you have a stable internet connection or Geo Location is enabled on browser</div>';
+      }
+
+
+      }
+    ?>
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
@@ -88,6 +135,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   <p class="text-muted text-center"><?php echo $bank_details['bank_name'];?></p>
                   
                   <a href="#" class="btn btn-primary btn-block" data-toggle="modal" data-target="#modal-default"><i class="fas fa-edit"></i><b> Update Profile</b></a>
+                   <button type="button" class="btn btn-danger btn-block pulse" data-toggle="modal" data-target="#modal-location" onclick="updateLocation()"><i class="fas fa-map-marker-alt"></i> Update Location</button>
                 </div>
                 <!-- /.card-body -->
               </div>
@@ -158,7 +206,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <!-- /.tab-pane -->
   
                     <div class="tab-pane" id="settings">
-                      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5374.699792734222!2d34.596565374292375!3d-0.005905390202308548!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182aa9f1efed77e9%3A0xb9c8a555cc010ad6!2sMaseno%20University-Kisumu%20Campus!5e0!3m2!1sen!2ske!4v1676045331090!5m2!1sen!2ske" frameborder="0" style="border:0; width: 100%; height: 250px;" allowfullscreen></iframe>
+                      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d!2d<?php echo $bank_details['lon']; ?>!3d<?php echo $bank_details['lat']; ?>!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182aa9f1efed77e9%3A0xb9c8a555cc010ad6!2s<?php echo $bank_details['bank_name']; ?>%20Blood%20Bank-<?php echo $bank_details['county']?>!5e0!3m2!1sen!2ske!4v1676045331090!5m2!1sen!2ske" frameborder="0" style="border:0; width: 100%; height: 250px;" allowfullscreen></iframe>
                     </div>
                     <!-- /.tab-pane -->
                   </div>
@@ -230,22 +278,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </div>
               </div>
             </div>
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" name="banklat" placeholder="Latitude" value="<?php echo $bank_details['lat'] ? $bank_details['lat'] : '' ?>">
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-globe"></span>
-                </div>
-              </div>
-            </div>
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" name="banklon" placeholder="Logitude" value="<?php echo $bank_details['lon'] ? $bank_details['lon'] : '' ?>">
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="fas fa-globe"></span>
-                </div>
-              </div>
-            </div>
             <div class="row">
               <div class="col-8">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
@@ -266,6 +298,33 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- /.modal -->
 
   <!-- /.modal -->
+  <div class="modal fade" id="modal-location">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Confirm Updating Bank location</h4>
+          <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+        Updating Bank location....
+        <h2 class="text-center">UPDATING LOCATION USING GEOLOCATION</h2>
+        </div>
+        <form method="post" name="update-location" role="update-location" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <input type="hidden" name="bank_lat" id="bank_lat" placeholder="Latitude">
+        <input type="hidden" name="bank_lon" id="bank_lon" placeholder="Longitude">
+          <div class="modal-footer">
+              <!-- <div class="row"> -->
+                <button type="submit" id="update-location" name="update-location" class="btn btn-danger btn-block">Update Bank Location</button>
+          </div>
+        </form>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
 
   <!-- Footer -->
   <?php include 'includes/footer.php'; ?>
@@ -273,6 +332,26 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 </div>
 <!-- ./wrapper -->
+<script>
+function updateLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var lat = position.coords.latitude;
+      var lon = position.coords.longitude;
+      
+      document.getElementById("bank_lat").value = lat;
+      document.getElementById("bank_lon").value = lon;
+      console.log("Longitude"+ lat);
+      console.log("Latitude"+ lon);
+      
+    });
+  } else {
+    // $('#update-location').prop('disabled',true );
+    alert("Geolocation is not supported by this browser.");
+   
+  }
+}
 
+</script>
 </body>
 </html>

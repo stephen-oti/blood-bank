@@ -45,18 +45,28 @@ mysqli_stmt_close($stmt);
     $queryappeal =  mysqli_query($conn,$sqlappeal);
     $availability = mysqli_num_rows($queryappeal);
 
-    $sqlquest = "SELECT last_update_time FROM questionnaire WHERE user_type = 'patient' AND  p_id = $patient_id";
-    $questquery = mysqli_query($conn, $sqlquest);
-    $questionnaire = mysqli_fetch_array($questquery);
-    $qdate = $questionnaire['last_update_time'];
-    $convertedate = new DateTime($qdate);
-    $today = new DateTime();
-    if ($convertedate) {
-      $days = $today->diff($convertedate)->days;
-    } else {
-      $days = null;
-    }
+    $sqlquest = "SELECT last_update_time FROM questionnaire WHERE user_type = 'patient' AND p_id = $patient_id";
 
+    $questquery = mysqli_query($conn, $sqlquest);
+    
+    $questionnaire = mysqli_fetch_array($questquery);
+    
+    if ($questionnaire != null) {
+        $qdate = $questionnaire['last_update_time'];
+    
+        $convertedate = new DateTime($qdate);
+    
+        $today = new DateTime();
+    
+        if ($convertedate) {
+            $days = $today->diff($convertedate)->days;
+        } else {
+            $days = null;
+        }
+    } else {
+        $days = null;
+        $qdate = null;
+    }
 
   ?>
 

@@ -71,10 +71,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <div class="card">
                 <!-- /.card-header -->
                 <div class="card-header">
-                
-                <div class="clearfix">
-                    <button type="button" class="btn btn-primary float-right" title="Print Report"><i class="fas fa-print"></i> Print Report</button>
-                    </div>
+                  <div class="clearfix">    
+                    <button type="submit" class="btn btn-primary float-right" title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</button>
+                  </div> 
                 </div>
                 <div class="card-body">
                 <table id="example1" class="table table-bordered table-striped">
@@ -106,7 +105,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 if(isset($_GET['appeal'])){
                                   $appeal_status = $_GET['appeal'];
                                   if( $appeal_status == "approved"){
-                                    $sql .= " AND patient_appeal.`app_status` = 1 OR patient_appeal.`app_status` = 4";
+                                    $sql .= " AND (patient_appeal.`app_status` = 1 OR patient_appeal.`app_status` = 4)";
                                   }else if($appeal_status == "pending"){
                                     $sql .= " AND patient_appeal.`app_status` = 0";
                                   }else if($appeal_status == "rejected"){
@@ -166,7 +165,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     </a>
                     <?php
                        }else if($appstatus == 1){
-                        echo "Visist the transfusion";
+                        echo "Visit the transfusion";
                       }else if($appstatus == 2){
                         echo "$comment";
                       }else if($appstatus == 3){
@@ -237,6 +236,29 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- /.modal-dialog -->
   </div>
   <!-- /.modal -->
+
+  <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Appeal And Transfusion History Reports</span></h4>
+              <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+            <?php $url = "report.php?patient_id=". $patient_details['id']."&patient_name=".$patient_details['fname']." ".$patient_details['lname']."&action=patient-history"; ?>
+            <iframe src="<?php echo $url; ?>" style='width: 100%; height: 600px';></iframe>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
 
   <!-- Footer -->
   <?php include 'includes/footer.php'; ?>

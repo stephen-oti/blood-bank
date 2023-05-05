@@ -736,10 +736,10 @@
                   <li><a data-scroll-nav="0" href="#">Home</a></li>
                   <li><a data-scroll-nav="5" href="#faq">FAQ</a></li>
                   <li><a data-scroll-nav="4" href="#status">Status</a></li>
-                  <li><a href="Administrator/login.php">Admin Login</a></li>
-                  <li><a href="Bloodbank/login.php">Bank Login</a></li>
-                  <li><a href="donor/login.php">Donor Login</a></li>
-                  <li><a href="patient/login.php">Patient Login</a></li>
+                  <li><a href="Administrator/index.php">Admin </a></li>
+                  <li><a href="Bloodbank/index.php">Blood Bank</a></li>
+                  <li><a href="donor/index.php">Donor</a></li>
+                  <li><a href="patient/index.php">Patient</a></li>
                   <li><a href="RegistrationReq/requestreg.php">Request Admin Registration</a></li>
                   
 

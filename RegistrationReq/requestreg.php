@@ -57,11 +57,14 @@ include '../dbconfig.php';
                     echo '<div class="alert bg-danger">Error while updating record, Try again later</div>';
                 } else { 
                     // Display the success message with the styled alert
-                    echo '<div class="alert bg-success">Request Successfully submitted</div>';   
+                    echo '<div class="alert bg-success">Your Request Successfully submitted. Keep posted on your mail for a reply soon</div>';  
+                    // Redirect to the login page after 3 seconds
+                    echo '<script>setTimeout(function() { window.location.href = "../index.php"; }, 3000);</script>'; 
                 }
             } else {
                 // // Display the error message with the styled alert
                 echo '<div class="alert bg-danger">Make Sure all fields are filled in</div>';
+                
             }
       }else{
         echo '<div class="alert bg-danger">You did not upload your Qualifications</div>';

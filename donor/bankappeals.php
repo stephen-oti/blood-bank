@@ -94,7 +94,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <?php if($donor_details['donation_days'] < 0){ ?>
                 <div class="callout callout-warning">
                 <h5><i class="fas fa-history"></i> Donation Time: <span class="badge badge-danger"><?php echo abs($donor_details['donation_days']); ?> Days  to go</span></h5>
-                  You can only donate once after every 35 days, Your last Donation was <b><?php echo  $donor_details['d_next']; ?></b> you've got <b><?php echo abs($donor_details['donation_days']); ?> </b>more days to go
+                  You can only donate once after every 56 days, Your last Donation was <b><?php echo  $donor_details['d_next']; ?></b> you've got <b><?php echo abs($donor_details['donation_days']); ?> </b>more days to go
               </div>
               <?php } ?>
               

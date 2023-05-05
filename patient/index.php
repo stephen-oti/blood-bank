@@ -38,7 +38,23 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <!-- Main Sidebar Container -->
   <?php include 'includes/sidebar.php'?>
   <!-- /.Main Sidebar Container -->
-  
+  <style>
+  .pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(255, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+  }
+}
+</style>
 
     <?php
 
@@ -63,8 +79,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
     $patient_id = $patient_details['id'];
     // Get the updated values from the form
     $blood_group = intval($_POST['blood_group']);
-    $latitude = $_POST['lat'];
-    $longitude = $_POST['long'];
     $p_status = 1;
 
     // Check if a medical condition was selected
@@ -92,13 +106,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
         move_uploaded_file($_FILES['customFile']['tmp_name'], $target_file);
     
         // Update the patient record in the database
-        $sql = "UPDATE patient SET blood_id = ?, p_cond = ?, p_lat = ?, p_lon = ?, p_report = ? ,p_status = ? WHERE id = ?";
+        $sql = "UPDATE patient SET blood_id = ?, p_cond = ?, p_report = ? ,p_status = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "isddsii", $blood_group, $medical_condition, $latitude, $longitude, $file_name,$p_status, $patient_id);
+        mysqli_stmt_bind_param($stmt, "issii", $blood_group, $medical_condition, $file_name,$p_status, $patient_id);
   }else{
-    $sql = "UPDATE patient SET blood_id = ?, p_cond = ?, p_lat = ?, p_lon = ?, p_status = ? WHERE id = ?";
+    $sql = "UPDATE patient SET blood_id = ?, p_cond = ?,  p_status = ? WHERE id = ?";
     $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "isddii", $blood_group, $medical_condition, $latitude, $longitude, $p_status, $patient_id);
+    mysqli_stmt_bind_param($stmt, "isii", $blood_group, $medical_condition, $p_status, $patient_id);
   }
     mysqli_stmt_execute($stmt);
 
@@ -171,7 +185,37 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </div>
       </div><!-- /.container-fluid -->
     </section>
+    <?php
+      if(isset($_POST['update-location'])) {
+        $patient_id = $_SESSION['patient_id'];
+        // Get the updated values from the form
+        $patient_lat = $_POST['pat_lat'];
+        $patient_lon = $_POST['pat_lon'];
+        
+      if(!($patient_lat == null) && !($patient_lon == null)){
+    
+        // Update the patient record in the database
+        $sql = "UPDATE patient SET p_lat = ?, p_lon = ? WHERE id = ?";
+        $stmnt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmnt, "ddi", $patient_lat, $patient_lon, $patient_id);
+        mysqli_stmt_execute($stmnt);
+      
+        // Check if the update was successful
+        if(mysqli_stmt_affected_rows($stmnt) > 0) {
+          echo '<div class="alert alert-success alert-dismissible fade show" role="alert">Location Updated Successfully.</div>';
+          echo '<meta http-equiv="refresh" content="2">';
+        } else {
+          echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">Update failed. Please try again.</div>';
+        }
+          // Close the statement
+          mysqli_stmt_close($stmnt);
+      }else{
+        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">Ensure you have a stable internet connection or Geo Location is enabled on browser</div>';
+      }
 
+
+      }
+    ?>
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
@@ -411,34 +455,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             <label class="custom-file-label" for="customFile"> <?php echo $patient_details['p_report'] ? $patient_details['p_report'] : '~Upload PDF medical report~' ?></label>
                           </div>
                         </div>
-                        <label for="location">Location Details <span style="font-size: small; color:red; font-style: italic;">(Get details using Google Maps and paste here)</span></label>
-                        <span class="response" data-input="lat"></span>
-                        <div class="input-group mb-3">
-                            <input type="text" class="form-control" name="lat" id="lat" placeholder="Latitude" onkeyup="validateInput('lat')" value="<?php echo $patient_details['p_lat'] ? $patient_details['p_lat'] : '' ?>">
-                            <div class="input-group-append">
-                              <div class="input-group-text">
-                                <span class="fas fa-globe"> Latitude</span>
-                              </div>
-                            </div>
-                        </div>
-                        <span class="response" data-input="long"></span>
-                        <div class="input-group mb-3">
-                          <input type="text" class="form-control" name="long" id="long" placeholder="Longitude" onkeyup="validateInput('long')" value="<?php echo $patient_details['p_lon'] ? $patient_details['p_lon'] : '' ?>">
-                          <div class="input-group-append">
-                            <div class="input-group-text">
-                              <span class="fas fa-globe"> Longitude</span>
-                            </div>
-                          </div>
-                        </div>
-
             
                         <div class="row">
-                          <div class="col-8">
-                            
+                          <div class="col-6">
+                          <button type="button" class="btn btn-danger btn-block pulse" data-toggle="modal" data-target="#modal-location" onclick="updateLocation()"><i class="fas fa-map-marker-alt"></i> Update Location</button>
                           </div>
                           <!-- /.col -->
-                          <div class="col-4">
-                            <button type="submit" name="update-pi" id="update-pi" class="btn btn-success btn-block">Update</button>
+                          <div class="col-6">
+                            <button type="submit" name="update-pi" id="update-pi" class="btn btn-success btn-block">Update blood</button>
                           </div>
                           <!-- /.col -->
                         </div>
@@ -714,6 +738,34 @@ scratch. This page gets rid of all links and provides the needed markup only.
   </div>
   <!-- /.modal -->
 
+  <div class="modal fade" id="modal-location">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Confirm Updating location</h4>
+          <button type="button" class="close" style="outline:none;" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+        Updating user location....
+        <h2 class="text-center">UPDATING LOCATION USING GEOLOCATION</h2>
+        </div>
+        <form method="post" name="update-location" role="update-location" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+        <input type="hidden" name="pat_lat" id="pat_lat" placeholder="Latitude">
+        <input type="hidden" name="pat_lon" id="pat_lon" placeholder="Longitude">
+          <div class="modal-footer">
+              <!-- <div class="row"> -->
+                <button type="submit" id="update-location" name="update-location" class="btn btn-danger btn-block">Update Location</button>
+          </div>
+        </form>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
   <!-- Control Sidebar -->
   <?php     mysqli_close($conn); ?>
   <!-- Footer -->
@@ -818,6 +870,27 @@ function validateInput(inputName) {
       }
     }
   });
+}
+
+</script>
+<script>
+function updateLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var lat = position.coords.latitude;
+      var lon = position.coords.longitude;
+      
+      document.getElementById("pat_lat").value = lat;
+      document.getElementById("pat_lon").value = lon;
+      console.log("Longitude"+ lat);
+      console.log("Latitude"+ lon);
+      
+    });
+  } else {
+    // $('#update-location').prop('disabled',true );
+    alert("Geolocation is not supported by this browser.");
+   
+  }
 }
 
 </script>

@@ -91,7 +91,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <div class="row">
                 <div class="col-12">
     
-                <div class="card">   
+                <div class="card">  
+                    <div class="card-header">
+                      <div class="clearfix">
+                        <a class="btn btn-primary float-right open-link" 
+                        href = "report.php?bank_id=<?php echo $bank_details['id']?>&bank_name=<?php echo $bank_details['bank_name']?>&action=patient-appeals" 
+                        title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                      </div>
+                    </div>  
                     <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">
                         <thead>
@@ -302,10 +309,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <b>Recent Medical Conditions</b> <a class="float-right"><span id="pat_cond"></span></a>
             </li>
             <li class="list-group-item">
-              <b>Medical History</b><a id="pat_report" href="#" target="_blank" class="float-right text-primary"><span class="pat_name"></span>'s medical Record.pdf <i class="fas fa-external-link-alt"></i></a>
+              <b>Medical History</b><a id="pat_report" href="#"  data-toggle="modal" data-target="#modal-xl" class="float-right text-primary open-link"><span class="pat_name"></span>'s medical Record.pdf <i class="fas fa-external-link-alt"></i></a>
             </li>
             <li class="list-group-item">
-              <b>Questionnaire</b><a id="pat_quest" href="#"  target = "_blank" class="float-right text-primary"><span class="pat_name"></span>'s - Questionnaire.pdf <i class="fas fa-external-link-alt"></i></a>
+              <b>Questionnaire</b><a id="pat_quest" href="#"  data-toggle="modal" data-target="#modal-xl" class="float-right text-primary open-link"><span class="pat_name"></span>'s - Questionnaire.pdf <i class="fas fa-external-link-alt"></i></a>
             </li>
           </ul>
         </div>
@@ -386,7 +393,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
   var disapprovebtn = document.querySelectorAll('.btn-disappr');
   var approvebtn = document.querySelectorAll('.btn-appr');
 
-
   viewbtn.forEach(function(button) {
   button.addEventListener('click', function() {
     var name = button.getAttribute('pat-name');
@@ -398,7 +404,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     var full_name = button.getAttribute('full-name');
 
     rep_link = "../patient/uploads/"+report;
-    quest_link = "questionnaires.php?user_id="+quest;
+    quest_link = "questionnaire.php?question="+quest+"&action=patient-questionnaire";
 
     $('#patient_name').html(full_name);
     $('#pat_gender').html(gender);
@@ -437,6 +443,7 @@ approvebtn.forEach(function(button) {
     
   });
 });
+
 </script>
 </body>
 </html>

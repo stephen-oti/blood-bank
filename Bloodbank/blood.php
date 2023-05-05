@@ -67,11 +67,13 @@
     
                 <div class="card">
                     <!-- /.card-header -->
-                    <div class="card-header">  
-                    <!-- <div class="clearfix">
-                        <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#modal-add" title="Search"><i class="fas fa-plus"></i> Add Unit</button>
-                        </div>
-                    </div> -->
+                    <div class="card-header">
+                            <div class="clearfix">
+                              <a class="btn btn-primary float-right open-link" 
+                              href = "report.php?bank_id=<?php echo $bank_details['id']?>&bank_name=<?php echo $bank_details['bank_name']?>&action=bank-blood" 
+                              title="Print Report" data-toggle="modal" data-target="#modal-xl"><i class="fas fa-print"></i> Print Report</a>
+                            </div>
+                          </div>
     
                     <div class="card-body">
                     <table id="example1" class="table table-bordered table-striped">
@@ -159,7 +161,7 @@
                     <!-- /.card-body -->
                 </div>
                 <!-- /.card -->
-                </div>
+               
                 <div class="card">
                   <!-- /.card-header -->
                   <div class="card-header">  
