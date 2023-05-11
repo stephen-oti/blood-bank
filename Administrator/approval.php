@@ -45,18 +45,27 @@ scratch. This page gets rid of all links and provides the needed markup only.
       if(isset($_POST['reject-approval'])) {
         // Get the updated values from the form
         $reqid = $_POST['rejid'];
+        $rejmail = $_POST['rejmail'];
         $status = 2;
+        $admin = "Admin ".$admin_details['fname'];
+        $name = $_POST['rejnames'];
+        $subject = "Request Denied";
+
         if($_POST['comment'] == Null){
-          $comment = "None";
+          $comment = "None provided";
         }else{
           $comment = $_POST['comment'];
         }
+        $message = "Your Request application For an administrative Work at <b>OBBS</b> has been <b>Disapproved</b><br><b>Reason: </b> $comment";
           // Update the record in the Blood Bank table
           $stmt = mysqli_prepare($conn, "UPDATE reg_request SET comments = ?, req_status = ? WHERE req_id = ?");
           mysqli_stmt_bind_param($stmt, "sii", $comment, $status, $reqid);
           mysqli_stmt_execute($stmt);
           // Check if the update was successful
           if(mysqli_stmt_affected_rows($stmt) > 0) {
+            include_once '../mailer.php';
+            sendmail("sotieno443@gmail.com",$name,$admin,$subject,$message);
+
             echo '<div class="alert bg-success">Request Has been dissaproved Rejected</div>';  
             echo '<meta http-equiv="refresh" content="2">';
           } else {
@@ -103,6 +112,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
             if(mysqli_stmt_error($stmt)) {
               echo "<div class='alert alert-danger alert-dismissible fade show btn-delete' role='alert'>Error Inserting Record to Respective Table: " . mysqli_error($conn)."</div>";
             }else{
+              $usermail = $request['email'];
+              $username =  $request['fname']." ".$request['lname'];
+              $admin_name = "Admin ".$admin_details['fname'];
+              $mailsubject = "Request Approved";
+              $userpassword = $request['pword'];
+              $userrole = ($request['req_role'] == "admin")? "$admin_role": "Blood Bank will be assigned shortly";
+              $mailbody = "Your Application was approved <br> You were assigned the role: <b>$userrole</b><br>use username:  $usermail <br> password: $userpassword";
+              include_once '../mailer.php';
+              sendmail("sotieno443@gmail.com",$username,$admin_name,$mailsubject,$mailbody);
+
               echo '<div class="alert bg-success">Request Has beenn Succesfully approved</div>';  
               echo '<meta http-equiv="refresh" content="2">';
             }
@@ -177,7 +196,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                               <a class="btn btn-success btn-sm btn-accept" href="#" data-toggle="modal" data-target="#modal-accept" data-id='<?php echo $id; ?>'>
                                 <i class="fas fa-user-plus"></i>
                               </a>
-                              <a class="btn btn-danger btn-sm btn-reject" href="#" data-toggle="modal" data-target="#modal-reject" data-id='<?php echo $id; ?>'>
+                              <a class="btn btn-danger btn-sm btn-reject" href="#" data-toggle="modal" data-target="#modal-reject" data-id='<?php echo $id; ?>'  data-mail='<?php echo $email; ?>' >
                                 <i class="fas fa-times"></i>
                             </a>
                         </td>
@@ -293,6 +312,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <form method="post" name="reject-approval" id="reject-approval" role="reject-approval" action="<?php echo $_SERVER['PHP_SELF']; ?>">
         <label for="" class="text-danger">Rejecting... <span id="rejname" style="text-transform: uppercase;" class="text-dark"></span></label>
         <input type="hidden" name="rejid" id="rejid">
+        <input type="hidden" id="rejmail" name="rejmail">
+        <input type="hidden" id="rejnames" name="rejnames">
             <div class="input-group mb-3">
                 
               <textarea class="form-control" placeholder="Brief Comments..." style="resize:none;" name="comment" id="" cols="30" rows=""></textarea>
@@ -378,6 +399,7 @@ accept.forEach(function(button) {
 reject.forEach(function(button) {
   button.addEventListener('click', function() {
     var editBank_id = button.getAttribute('data-id');
+    var mail = button.getAttribute('data-mail');
     $.ajax({
             url: "action.php",
             type: "POST",
@@ -390,6 +412,8 @@ reject.forEach(function(button) {
                 // Process the response here
                 console.log(response);
                 $('#rejid').val(response.id);
+                $('#rejmail').val(mail);
+                $('#rejnames').val(response.fullName);
                 $('#rejname').html(response.fullName);
             }
         });

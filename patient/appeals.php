@@ -350,7 +350,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <form method="post" name="make-appeal" role="make-appeal" action="<?php echo $_SERVER['PHP_SELF']; ?>">
             <div class="form-group">
                 <label for="">Quantity</label>
-                <input type="number" class="form-control" name="quantity" id="quantity" max="20" min= "5" placeholder="5" required>
+                <input type="number" class="form-control" name="quantity" id="quantity" max="75" min= "20" placeholder="5" required>
             </div>
             <div class="form-group">
                 <input type="hidden" class="form-control" name="bank-id" id="bank-id">
