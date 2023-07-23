@@ -13,14 +13,14 @@ $mail = new PHPMailer(true);
 try {
     $mail->SMTPDebug = 2;
     $mail->isSMTP();
-    $mail->Host     = 'mail.networkforresearchandgovernance.org';
+    $mail->Host     = 'mail.####.org';
     $mail->SMTPAuth = true;
-    $mail->Username = 'info.obbs@networkforresearchandgovernance.org';
-    $mail->Password = 'Grande@2$22';
+    $mail->Username = 'info.obbs@####.org';
+    $mail->Password = '********';
     $mail->SMTPSecure = 'ssl';
     $mail->Port     = 465;
 
-    $mail->setFrom('info.obbs@networkforresearchandgovernance.org', "OBBS: $from_name");
+    $mail->setFrom('info.obbs@#####.org', "OBBS: $from_name");
     $mail->addAddress($email);
     $mail->isHTML(true);
     $mail->Subject = $subject;
